@@ -1,6 +1,4 @@
-function plotTankHeights(T, H, title_)
-
-fig = figure;
+function plotTankHeights(T, H)
 
 subplot(2,2,3);
 plot(T, H(:,1));
@@ -17,7 +15,5 @@ title('Tank 3')
 subplot(2,2,2);
 plot(T, H(:,4));
 title('Tank 4')
-
-sgtitle(fig, title_)
 
 end

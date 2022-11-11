@@ -27,23 +27,104 @@ p = [p; xs; ys; us; d];
 t0 = 0;
 tf = 15*60;
 
+% F1 RESPONSES
 % 10% F1 response
-stepResponseSimulation(1.1,1,@FourTankSystem,t0,tf,xs,us,d,p,"Simulation of 10% step response of F1")
-
-% 10% F2 response
-stepResponseSimulation(1.1,2,@FourTankSystem,t0,tf,xs,us,d,p,"Simulation of 10% step response of F2")
+[T10, H10] = stepResponseSimulation(1.1,1,@FourTankSystem,t0,tf,xs,us,d,p);
 
 % 25% F1 response
-stepResponseSimulation(1.25,1,@FourTankSystem,t0,tf,xs,us,d,p,"Simulation of 25% step response of F1")
-
-% 25% F2 response
-stepResponseSimulation(1.25,2,@FourTankSystem,t0,tf,xs,us,d,p,"Simulation of 25% step response of F2")
+[T25, H25] = stepResponseSimulation(1.25,1,@FourTankSystem,t0,tf,xs,us,d,p);
 
 % 50% F1 response
-stepResponseSimulation(1.5,1,@FourTankSystem,t0,tf,xs,us,d,p,"Simulation of 50% step response of F1")
+[T50, H50] = stepResponseSimulation(1.5,1,@FourTankSystem,t0,tf,xs,us,d,p);
+
+fig = figure;
+
+subplot(2,2,3);
+hold on;
+plot(T10, H10(:,1));
+plot(T25, H25(:,1));
+plot(T50, H50(:,1));
+title('Tank 1')
+hold off;
+
+subplot(2,2,4);
+hold on;
+plot(T10, H10(:,2));
+plot(T25, H25(:,2));
+plot(T50, H50(:,2));
+title('Tank 2')
+hold off;
+legend('10% step', '25% step', '50% step', 'Location', 'SouthEast');
+
+subplot(2,2,1);
+hold on;
+plot(T10, H10(:,3));
+plot(T25, H25(:,3));
+plot(T50, H50(:,3));
+title('Tank 3')
+hold off;
+
+subplot(2,2,2);
+hold on;
+plot(T10, H10(:,4));
+plot(T25, H25(:,4));
+plot(T50, H50(:,4));
+title('Tank 4')
+hold off;
+sgtitle(fig, "Step responses to changes in F1 flow");
+saveas(fig, '../Exam project/Figures/deterministic_f1.png')
+
+% F2 RESPONSES
+% 10% F2 response
+[T10, H10] = stepResponseSimulation(1.1,2,@FourTankSystem,t0,tf,xs,us,d,p);
+
+% 25% F2 response
+[T25, H25] = stepResponseSimulation(1.25,2,@FourTankSystem,t0,tf,xs,us,d,p);
 
 % 50% F2 response
-stepResponseSimulation(1.5,2,@FourTankSystem,t0,tf,xs,us,d,p,"Simulation of 50% step response of F2")
+[T50, H50] = stepResponseSimulation(1.5,2,@FourTankSystem,t0,tf,xs,us,d,p);
+
+fig = figure;
+subplot(2,2,3);
+hold on;
+plot(T10, H10(:,1));
+plot(T25, H25(:,1));
+plot(T50, H50(:,1));
+title('Tank 1')
+hold off;
+
+subplot(2,2,4);
+hold on;
+plot(T10, H10(:,2));
+plot(T25, H25(:,2));
+plot(T50, H50(:,2));
+title('Tank 2')
+hold off;
+legend('10% step', '25% step', '50% step', 'Location', 'SouthEast');
+
+subplot(2,2,1);
+hold on;
+plot(T10, H10(:,3));
+plot(T25, H25(:,3));
+plot(T50, H50(:,3));
+title('Tank 3')
+hold off;
+
+subplot(2,2,2);
+hold on;
+plot(T10, H10(:,4));
+plot(T25, H25(:,4));
+plot(T50, H50(:,4));
+title('Tank 4')
+hold off;
+sgtitle(fig, "Step responses to changes in F2 flow");
+saveas(fig, '../Exam project/Figures/deterministic_f2.png')
+
+% figure;
+% plot(0:1:900, 0.1769*(1-exp(-(0:1:900)/100)))
+% hold on;
+% plot(T10, H10(:,2));
+% hold off;
 
 %% PROBLEM 4
 xdot = FourTankSystemLinear(0,xs,us,p);
