@@ -31,7 +31,7 @@ dt = 4; % Time step (I think)
 
 %% Linearization
 hs = ys;
-T = (At./ap).*sqrt(hs*4/(2*g));
+T = sqrt(2*At.*xs)./(ap.*sqrt(rho*g));
 % T = (At./ap).*sqrt(hs*4/(2*g));
 A = [-1/T(1) 0 1/T(3) 0;0 -1/T(2) 0 1/T(4);0 0 -1/T(3) 0;0 0 0 -1/T(4)];
 B = [rho*gam(1) 0;0 rho*gam(2); 0 rho*(1-gam(2)); rho*(1-gam(1)) 0];
@@ -70,3 +70,21 @@ Mat = [
     ""];
 
 T2L(param_names, trans_fun, Mat, '../Exam project/Tables/params_anal.tex');
+
+%% Discretize
+M = expm([A, B; zeros(2,6)]*dt);
+Ad1 = M(1:4, 1:4);
+Bd1 = M(1:4, 5:6);
+
+E = [
+    0, 0;
+    0, 0;
+    rho*d(1), 0;
+    0, rho*d(2)
+    ];
+
+M = expm([A, B, E; zeros(4,8)]*dt);
+Ad = M(1:4, 1:4);
+Bd = M(1:4, 5:6);
+Ed = M(1:4, 7:8);
+
