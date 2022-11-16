@@ -28,24 +28,138 @@ t0 = 0;
 tf = 15*60;
 
 T = 1;
-Rvv = 0*0.05*eye(4);
+Rvv = 0.05*eye(4);
 Rdd = 5*eye(2);
 mud = d;
 
+%% F1
 % 10% F1 response
-noisyStepResponseSimulation(1.1,1,T,@noisyFourTankSystem,t0,tf,xs,us,p,Rvv,Rdd,mud,"Stochastic simulation of 10% step response of F1")
-
-% 10% F2 response
-noisyStepResponseSimulation(1.1,2,T,@noisyFourTankSystem,t0,tf,xs,us,p,Rvv,Rdd,mud,"Stochastic simulation of 10% step response of F2")
+[T10_1, H10_1] = noisyStepResponseSimulation(1.1,1,T,@noisyFourTankSystem,t0,tf,xs,us,p,Rvv,Rdd,mud);
 
 % 25% F1 response
-noisyStepResponseSimulation(1.25,1,T,@noisyFourTankSystem,t0,tf,xs,us,p,Rvv,Rdd,mud,"Stochastic simulation of 25% step response of F1")
-
-% 25% F2 response
-noisyStepResponseSimulation(1.25,2,T,@noisyFourTankSystem,t0,tf,xs,us,p,Rvv,Rdd,mud,"Stochastic simulation of 25% step response of F2")
+[T25_1, H25_1] = noisyStepResponseSimulation(1.25,1,T,@noisyFourTankSystem,t0,tf,xs,us,p,Rvv,Rdd,mud);
 
 % 50% F1 response
-noisyStepResponseSimulation(1.5,1,T,@noisyFourTankSystem,t0,tf,xs,us,p,Rvv,Rdd,mud,"Stochastic simulation of 50% step response of F1")
+[T50_1, H50_1] = noisyStepResponseSimulation(1.5,1,T,@noisyFourTankSystem,t0,tf,xs,us,p,Rvv,Rdd,mud);
 
-% 50% F2 response
-noisyStepResponseSimulation(1.5,2,T,@noisyFourTankSystem,t0,tf,xs,us,p,Rvv,Rdd,mud,"Stochastic simulation of 50% step response of F2")
+fig = figure;
+
+subplot(2,2,3);
+hold on;
+plot(T10_1, H10_1(:,1));
+plot(T25_1, H25_1(:,1));
+plot(T50_1, H50_1(:,1));
+title('Tank 1')
+hold off;
+
+subplot(2,2,4);
+hold on;
+plot(T10_1, H10_1(:,2));
+plot(T25_1, H25_1(:,2));
+plot(T50_1, H50_1(:,2));
+title('Tank 2')
+hold off;
+legend('10% step', '25% step', '50% step', 'Location', 'SouthEast');
+
+subplot(2,2,1);
+hold on;
+plot(T10_1, H10_1(:,3));
+plot(T25_1, H25_1(:,3));
+plot(T50_1, H50_1(:,3));
+title('Tank 3')
+hold off;
+
+subplot(2,2,2);
+hold on;
+plot(T10_1, H10_1(:,4));
+plot(T25_1, H25_1(:,4));
+plot(T50_1, H50_1(:,4));
+title('Tank 4')
+hold off;
+sgtitle(fig, "Step responses to changes in F1 flow");
+saveas(fig, '../Exam project/Figures/stochastic_f1.png')
+
+
+%% F2
+
+% 10% F1 response
+[T10_2, H10_2] = noisyStepResponseSimulation(1.1,2,T,@noisyFourTankSystem,t0,tf,xs,us,p,Rvv,Rdd,mud);
+
+% 25% F1 response
+[T25_2, H25_2] = noisyStepResponseSimulation(1.25,2,T,@noisyFourTankSystem,t0,tf,xs,us,p,Rvv,Rdd,mud);
+
+% 50% F1 response
+[T50_2, H50_2] = noisyStepResponseSimulation(1.5,2,T,@noisyFourTankSystem,t0,tf,xs,us,p,Rvv,Rdd,mud);
+
+fig = figure;
+subplot(2,2,3);
+hold on;
+plot(T10_2, H10_2(:,1));
+plot(T25_2, H25_2(:,1));
+plot(T50_2, H50_2(:,1));
+title('Tank 1')
+hold off;
+
+subplot(2,2,4);
+hold on;
+plot(T10_2, H10_2(:,2));
+plot(T25_2, H25_2(:,2));
+plot(T50_2, H50_2(:,2));
+title('Tank 2')
+hold off;
+legend('10% step', '25% step', '50% step', 'Location', 'SouthEast');
+
+subplot(2,2,1);
+hold on;
+plot(T10_2, H10_2(:,3));
+plot(T25_2, H25_2(:,3));
+plot(T50_2, H50_2(:,3));
+title('Tank 3')
+hold off;
+
+subplot(2,2,2);
+hold on;
+plot(T10_2, H10_2(:,4));
+plot(T25_2, H25_2(:,4));
+plot(T50_2, H50_2(:,4));
+title('Tank 4')
+hold off;
+sgtitle(fig, "Step responses to changes in F2 flow");
+saveas(fig, '../Exam project/Figures/stochastic_f2.png')
+
+
+%% All in one plot
+fig = figure;
+subplot(2,2,1);
+hold on;
+plot(T10_1, H10_1(:,1));
+plot(T25_1, H25_1(:,1));
+plot(T50_1, H50_1(:,1));
+title('Flow 1 to tank 1');
+hold off;
+
+subplot(2,2,2);
+hold on;
+plot(T10_1, H10_1(:,2));
+plot(T25_1, H25_1(:,2));
+plot(T50_1, H50_1(:,2));
+title('Flow 2 to tank 1');
+hold off;
+
+subplot(2,2,3);
+hold on;
+plot(T10_2, H10_2(:,1));
+plot(T25_2, H25_2(:,1));
+plot(T50_2, H50_2(:,1));
+title('Flow 1 to tank 2');
+hold off;
+
+subplot(2,2,4);
+hold on;
+plot(T10_2, H10_2(:,2));
+plot(T25_2, H25_2(:,2));
+plot(T50_2, H50_2(:,2));
+title('Flow 2 to tank 2');
+legend('10% step', '25% step', '50% step', 'Location', 'SouthEast');
+hold off;
+saveas(fig, '../Exam project/Figures/stochastic_all_in_one.png')
