@@ -1,5 +1,6 @@
 clear;
 close all;
+addpath("../Realization/")
 
 %% Set up the system
 a1 = 1.2272; %[cm2] Area of outlet pipe 1
@@ -28,7 +29,7 @@ t0 = 0;
 tf = 15*60;
 
 T = 1;
-Rvv = 0.05*eye(4);
+Rvv = 0*0.05*eye(4);
 Rdd = 5*eye(2);
 mud = d;
 

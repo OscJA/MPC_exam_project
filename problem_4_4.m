@@ -1,5 +1,6 @@
 clear;
 close all;
+addpath("../Realization/")
 
 %% Set up the system
 a1 = 1.2272; %[cm2] Area of outlet pipe 1

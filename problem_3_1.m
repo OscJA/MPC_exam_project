@@ -1,5 +1,6 @@
 clear;
 close all;
+addpath("../Realization/")
 
 %% Set up the system
 a1 = 1.2272; %[cm2] Area of outlet pipe 1
@@ -157,6 +158,60 @@ hold off;
 saveas(fig, '../Exam project/Figures/deterministic_all_in_one.png')
 %% Approx params
 
+r_min = inf;
+den_opt = [0,0,0];
+num_min = 0;
+a1DEL = 10;
+a2DEL = 100;
+a1LB = 0;
+a1UB = 1000;
+a2LB = 0;
+a2UB = 10000;
+s_opt = [];
+ts_opt = [];
+
+num = max(H10_2(:, 1));
+clc;
+for LLL=1:20
+    if LLL~=1
+        a1LB = den_opt(2)-a1DEL;
+        a1UB = den_opt(2)+a1DEL;
+        a1DEL = a1DEL/10;
+
+        a2LB = den_opt(1)-a2DEL;
+        a2UB = den_opt(1)+a2DEL;
+        a2DEL = a2DEL/10;
+    end
+    for alpha1=a1LB:a1DEL:a1UB
+        for alpha2=a2LB:a2DEL:a2UB
+            if alpha2 == 2735
+                f = 2;
+            end
+            den = [alpha2, alpha1, 1];
+            [s, ts] = sisoctf2dstep(num, den, 0, 4, size(H10_2,1)-1);
+            r_new = sum((H10_2(:,1)-s(1:end)).^2);
+            if r_new < r_min
+                r_min = r_new;
+                den_opt = den;
+                num_min = num;
+                s_opt = s;
+                ts_opt = ts;
+            end
+        end
+    end
+    disp(LLL);
+end
+figure;
+plot(ts_opt, s_opt);
+hold on;
+plot(T10_2, H10_2(:,1));
+hold off;
+title('G21');
+legend('Transfer estimate', 'Simulation', 'Location', 'SouthEast');
+
+
+%%
+
 % G11
 K11 = 0.129058;
 tau11 = 90;
@@ -184,8 +239,8 @@ legend('Transfer estimate', 'Simulation', 'Location', 'SouthEast');
 
 % G12
 K12 = 0.109817;
-tau1_12 = 120;
-tau2_12 = 35;
+tau1_12 = 120; tau1_12 = 104;
+tau2_12 = 35;tau2_12 = 45;
 c1 = tau1_12/(tau1_12-tau2_12);
 c2 = tau2_12/(tau2_12-tau1_12);
 
@@ -231,5 +286,11 @@ Mat = [string(K11), string(K12), string(K21), string(K22);
     "", string(tau2_12), string(tau2_21), ""];
 
 T2L(param_names, trans_fun, Mat, '../Exam project/Tables/params_sim.tex');
+
+
+%% Find linear model from param estimates
+tol = 1e-4;
+
+% [Ad,Bd,Cd,Dd,sH] = mimoctf2dss(num,den,tau,Ts,Nmax,tol);
 
 
