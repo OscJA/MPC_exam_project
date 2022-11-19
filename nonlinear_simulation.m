@@ -13,4 +13,22 @@ for i=1:nT
     H(i,:) = (X(i,:)-x0')./(rho*A);
 end
 
+step = 4;
+Y = zeros((tf-t0)/step, 4);
+x = x0;
+
+ys = p(17:20);
+i = 1;
+for t=t0:step:tf
+    xdot = systemFun(t,x,us,d,p);
+    % v = Rvv*randn(4,1);
+    y = FourTankSystemSensor(x+xdot*step, p);
+    Y(i, :) = y-ys;
+    % x = y.*(rho*A');
+    x = x + xdot*step;
+    i = i+1;
+end
+H = Y;
+T = t0:step:tf;
+
 end
