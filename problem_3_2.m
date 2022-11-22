@@ -27,21 +27,20 @@ p = [a1; a2; a3; a4; A1; A2; A3; A4; gamma1; gamma2; g; rho; xs; ys; us; d];
 %% Solve the stochastic problem
 t0 = 0;
 tf = 15*60;
-
-T = 1;
-Rvv = 0*0.05*eye(4);
+Ts = 4;
+Rvv = 0.05*eye(4);
 Rdd = 5*eye(2);
 mud = d;
 
 %% F1
 % 10% F1 response
-[T10_1, H10_1] = noisyStepResponseSimulation(1.1,1,T,@noisyFourTankSystem,t0,tf,xs,us,p,Rvv,Rdd,mud);
+[T10_1, H10_1] = noisyStepResponseSimulation(1.1,1,Ts,@noisyFourTankSystem,t0,tf,xs,us,p,Rvv,Rdd,mud);
 
 % 25% F1 response
-[T25_1, H25_1] = noisyStepResponseSimulation(1.25,1,T,@noisyFourTankSystem,t0,tf,xs,us,p,Rvv,Rdd,mud);
+[T25_1, H25_1] = noisyStepResponseSimulation(1.25,1,Ts,@noisyFourTankSystem,t0,tf,xs,us,p,Rvv,Rdd,mud);
 
 % 50% F1 response
-[T50_1, H50_1] = noisyStepResponseSimulation(1.5,1,T,@noisyFourTankSystem,t0,tf,xs,us,p,Rvv,Rdd,mud);
+[T50_1, H50_1] = noisyStepResponseSimulation(1.5,1,Ts,@noisyFourTankSystem,t0,tf,xs,us,p,Rvv,Rdd,mud);
 
 fig = figure;
 
@@ -84,13 +83,13 @@ saveas(fig, '../Exam project/Figures/stochastic_f1.png')
 %% F2
 
 % 10% F1 response
-[T10_2, H10_2] = noisyStepResponseSimulation(1.1,2,T,@noisyFourTankSystem,t0,tf,xs,us,p,Rvv,Rdd,mud);
+[T10_2, H10_2] = noisyStepResponseSimulation(1.1,2,Ts,@noisyFourTankSystem,t0,tf,xs,us,p,Rvv,Rdd,mud);
 
 % 25% F1 response
-[T25_2, H25_2] = noisyStepResponseSimulation(1.25,2,T,@noisyFourTankSystem,t0,tf,xs,us,p,Rvv,Rdd,mud);
+[T25_2, H25_2] = noisyStepResponseSimulation(1.25,2,Ts,@noisyFourTankSystem,t0,tf,xs,us,p,Rvv,Rdd,mud);
 
 % 50% F1 response
-[T50_2, H50_2] = noisyStepResponseSimulation(1.5,2,T,@noisyFourTankSystem,t0,tf,xs,us,p,Rvv,Rdd,mud);
+[T50_2, H50_2] = noisyStepResponseSimulation(1.5,2,Ts,@noisyFourTankSystem,t0,tf,xs,us,p,Rvv,Rdd,mud);
 
 fig = figure;
 subplot(2,2,3);
@@ -164,3 +163,85 @@ title('Flow 2 to tank 2');
 legend('10% step', '25% step', '50% step', 'Location', 'SouthEast');
 hold off;
 saveas(fig, '../Exam project/Figures/stochastic_all_in_one.png')
+
+%% Approx params
+
+%% G21
+[r_min, den_opt, num_min, s_opt, ts_opt] = find_transfer_params(H10_2(:,1), Ts);
+
+figure;
+plot(ts_opt, s_opt);
+hold on;
+plot(T10_2, H10_2(:,1));
+hold off;
+title('G21');
+legend('Transfer estimate', 'Simulation', 'Location', 'SouthEast');
+K21 = num_min/den_opt(1);
+a = 1;
+b = den_opt(2)/den_opt(1);
+c = den_opt(3)/den_opt(1);
+tau1_21 = (-b-sqrt(b^2-4*a*c))/(2*a);
+tau2_21 = (-b+sqrt(b^2-4*a*c))/(2*a);
+
+%% G21
+[r_min, den_opt, num_min, s_opt, ts_opt] = find_transfer_params(H10_1(:,2), Ts);
+
+figure;
+plot(ts_opt, s_opt);
+hold on;
+plot(T10_1, H10_1(:,2));
+hold off;
+title('G12');
+legend('Transfer estimate', 'Simulation', 'Location', 'SouthEast');
+K12 = num_min/den_opt(1);
+a = 1;
+b = den_opt(2)/den_opt(1);
+c = den_opt(3)/den_opt(1);
+tau1_12 = (-b-sqrt(b^2-4*a*c))/(2*a);
+tau2_12 = (-b+sqrt(b^2-4*a*c))/(2*a);
+
+
+%% G11
+[r_min, den_opt, num_min, s_opt, ts_opt] = find_transfer_params(H10_1(:,1), Ts);
+
+figure;
+plot(ts_opt, s_opt);
+hold on;
+plot(T10_1, H10_1(:,1));
+hold off;
+title('G11');
+legend('Transfer estimate', 'Simulation', 'Location', 'SouthEast');
+K11 = num_min/den_opt(2);
+tau11 = -den_opt(3)/den_opt(2);
+
+
+%% G22
+[r_min, den_opt, num_min, s_opt, ts_opt] = find_transfer_params(H10_2(:,2), Ts);
+
+figure;
+plot(ts_opt, s_opt);
+hold on;
+plot(T10_2, H10_2(:,2));
+hold off;
+title('G22');
+legend('Transfer estimate', 'Simulation', 'Location', 'SouthEast');
+K22 = num_min/den_opt(2);
+tau22 = -den_opt(3)/den_opt(2);
+
+%% Load the params to latex
+
+param_names = ["K"; "\\tau_1"; "\\tau_2"];
+trans_fun = ["G_{11}"; "G_{12}"; "G_{21}"; "G_{22}"];
+K = num2str([K11; K12; K21; K22]);
+tau_1s = num2str([tau11; tau1_12; tau1_21; tau22]);
+tau_2s = [""; tau2_12; tau2_21; ""];
+
+% T = table(trans_fun,K,tau_1s,tau_2s);
+% table2latex(T, '../Exam project/Tables/T.tex'); % params_sim.tex
+% Ttex = table2latex(T, []); % params_sim.tex
+
+Mat = [string(K11), string(K12), string(K21), string(K22);
+    string(tau11), string(tau1_12), string(tau1_21), string(tau22);
+    "", string(tau2_12), string(tau2_21), ""];
+
+T2L(param_names, trans_fun, Mat, '../Exam project/Tables/params_sim_noise.tex');

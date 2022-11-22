@@ -18,8 +18,8 @@ Y = zeros((tf-t0)/step, 4);
 x = x0;
 
 ys = p(17:20);
-i = 1;
-for t=t0:step:tf
+i = 2;
+for t=t0:step:tf-step
     xdot = systemFun(t,x,us,d,p);
     % v = Rvv*randn(4,1);
     y = FourTankSystemSensor(x+xdot*step, p);
