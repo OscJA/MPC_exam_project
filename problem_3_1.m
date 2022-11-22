@@ -209,17 +209,17 @@ tau11 = -den_opt(3)/den_opt(2);
 
 
 %% G22
-[r_min, den_opt, num_min, s_opt, ts_opt] = find_transfer_params(H10_2(:,2), Ts);
+[r_22, den_22, num_22, s_22, ts_22] = find_transfer_params(H10_2(:,2), Ts);
 
 figure;
-plot(ts_opt, s_opt);
+plot(ts_22, s_22);
 hold on;
 plot(T10_2, H10_2(:,2));
 hold off;
 title('G22');
 legend('Transfer estimate', 'Simulation', 'Location', 'SouthEast');
-K22 = num_min/den_opt(2);
-tau22 = -den_opt(3)/den_opt(2);
+K22 = num_22/den_22(2);
+tau22 = -den_22(3)/den_22(2);
 
 
 % %%
@@ -301,8 +301,12 @@ T2L(param_names, trans_fun, Mat, '../Exam project/Tables/params_sim.tex');
 
 
 %% Find linear model from param estimates
-tol = 1e-4;
+tol = 1e-5;
 
-[Ad,Bd,Cd,Dd,sH] = mimoctf2dss(num_11,den_11(2:3),1,Ts,tf,tol);
+[Ad11,Bd11,Cd11,Dd11,sH11] = mimoctf2dss({num_11},{den_11(2:3)},1,Ts,tf,tol);
+
+[Ad22,Bd22,Cd22,Dd22,sH22] = mimoctf2dss({num_22},{den_22(2:3)},1,Ts,tf,tol);
+
+
 
 
