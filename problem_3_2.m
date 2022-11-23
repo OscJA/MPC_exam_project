@@ -167,10 +167,10 @@ saveas(fig, '../Exam project/Figures/stochastic_all_in_one.png')
 %% Approx params
 
 %% G21
-[r_min, den_opt, num_min, s_opt, ts_opt] = find_transfer_params(H10_2(:,1), Ts);
+[r_min, den_opt, num_min, s_opt, ts_22] = find_transfer_params(H10_2(:,1), Ts);
 
 figure;
-plot(ts_opt, s_opt);
+plot(ts_22, s_opt);
 hold on;
 plot(T10_2, H10_2(:,1));
 hold off;
@@ -184,10 +184,10 @@ tau1_21 = (-b-sqrt(b^2-4*a*c))/(2*a);
 tau2_21 = (-b+sqrt(b^2-4*a*c))/(2*a);
 
 %% G21
-[r_min, den_opt, num_min, s_opt, ts_opt] = find_transfer_params(H10_1(:,2), Ts);
+[r_min, den_opt, num_min, s_opt, ts_22] = find_transfer_params(H10_1(:,2), Ts);
 
 figure;
-plot(ts_opt, s_opt);
+plot(ts_22, s_opt);
 hold on;
 plot(T10_1, H10_1(:,2));
 hold off;
@@ -202,10 +202,10 @@ tau2_12 = (-b+sqrt(b^2-4*a*c))/(2*a);
 
 
 %% G11
-[r_min, den_opt, num_min, s_opt, ts_opt] = find_transfer_params(H10_1(:,1), Ts);
+[r_min, den_opt, num_min, s_opt, ts_22] = find_transfer_params(H10_1(:,1), Ts);
 
 figure;
-plot(ts_opt, s_opt);
+plot(ts_22, s_opt);
 hold on;
 plot(T10_1, H10_1(:,1));
 hold off;
@@ -216,17 +216,17 @@ tau11 = -den_opt(3)/den_opt(2);
 
 
 %% G22
-[r_min, den_opt, num_min, s_opt, ts_opt] = find_transfer_params(H10_2(:,2), Ts);
+[r_22, den_22, num_22, s_22, ts_22] = find_transfer_params(H10_2(:,2), Ts);
 
 figure;
-plot(ts_opt, s_opt);
+plot(ts_22, s_22);
 hold on;
 plot(T10_2, H10_2(:,2));
 hold off;
 title('G22');
 legend('Transfer estimate', 'Simulation', 'Location', 'SouthEast');
-K22 = num_min/den_opt(2);
-tau22 = -den_opt(3)/den_opt(2);
+K22 = num_22/den_22(2);
+tau22 = -den_22(3)/den_22(2);
 
 %% Load the params to latex
 

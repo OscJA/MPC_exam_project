@@ -160,36 +160,36 @@ saveas(fig, '../Exam project/Figures/deterministic_all_in_one.png')
 %% Approx params
 
 %% G21
-[r_min, den_opt, num_min, s_opt, ts_opt] = find_transfer_params(H10_2(:,1), Ts);
+[r_21, den_21, num_21, s_21, ts_21] = find_transfer_params(H10_2(:,1), Ts);
 
 figure;
-plot(ts_opt, s_opt);
+plot(ts_21, s_21);
 hold on;
 plot(T10_2, H10_2(:,1));
 hold off;
 title('G21');
 legend('Transfer estimate', 'Simulation', 'Location', 'SouthEast');
-K21 = num_min/den_opt(1);
+K21 = num_21/den_21(1);
 a = 1;
-b = den_opt(2)/den_opt(1);
-c = den_opt(3)/den_opt(1);
+b = den_21(2)/den_21(1);
+c = den_21(3)/den_21(1);
 tau1_21 = (-b-sqrt(b^2-4*a*c))/(2*a);
 tau2_21 = (-b+sqrt(b^2-4*a*c))/(2*a);
 
-%% G21
-[r_min, den_opt, num_min, s_opt, ts_opt] = find_transfer_params(H10_1(:,2), Ts);
+%% G12
+[r_12, den_12, num_12, s_12, ts_12] = find_transfer_params(H10_1(:,2), Ts);
 
 figure;
-plot(ts_opt, s_opt);
+plot(ts_12, s_12);
 hold on;
 plot(T10_1, H10_1(:,2));
 hold off;
 title('G12');
 legend('Transfer estimate', 'Simulation', 'Location', 'SouthEast');
-K12 = num_min/den_opt(1);
+K12 = num_12/den_12(1);
 a = 1;
-b = den_opt(2)/den_opt(1);
-c = den_opt(3)/den_opt(1);
+b = den_12(2)/den_12(1);
+c = den_12(3)/den_12(1);
 tau1_12 = (-b-sqrt(b^2-4*a*c))/(2*a);
 tau2_12 = (-b+sqrt(b^2-4*a*c))/(2*a);
 
@@ -204,8 +204,8 @@ plot(T10_1, H10_1(:,1));
 hold off;
 title('G11');
 legend('Transfer estimate', 'Simulation', 'Location', 'SouthEast');
-K11 = num_min/den_opt(2);
-tau11 = -den_opt(3)/den_opt(2);
+K11 = num_11/den_11(2);
+tau11 = -den_11(3)/den_11(2);
 
 
 %% G22
@@ -307,6 +307,12 @@ tol = 1e-5;
 
 [Ad22,Bd22,Cd22,Dd22,sH22] = mimoctf2dss({num_22},{den_22(2:3)},1,Ts,tf,tol);
 
+%% MIMO
+numerators = {{num_11}, {num_21}; {num_12}, {num_22}};
+denominators = {{den_11(2:3)}, {den_21}; {den_12}, {den_22(2:3)}};
+
+[Ad,Bd,Cd,Dd,sH] = mimoctf2dss(numerators,denominators,1,Ts,tf,tol);
+% [Ad21,Bd21,Cd21,Dd21,sH21] = mimoctf2dss({num_21},{den_21},1,Ts,tf,tol);
 
 
 
