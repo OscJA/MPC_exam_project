@@ -26,18 +26,18 @@ p = [p; xs; ys; us; d];
 
 %% Solve the deterministic problem over time
 t0 = 0;
-tf_ = 15*60;
+tf = 15*60;
 Ts = 4;
 
 % F1 RESPONSES
 % 10% F1 response
-[T10_1, H10_1] = stepResponseSimulation(1.1,1,@FourTankSystem,t0,tf_,xs,us,d,p);
+[T10_1, H10_1] = stepResponseSimulation(1.1,1,@FourTankSystem,t0,tf,xs,us,d,p);
 
 % 25% F1 response
-[T25_1, H25_1] = stepResponseSimulation(1.25,1,@FourTankSystem,t0,tf_,xs,us,d,p);
+[T25_1, H25_1] = stepResponseSimulation(1.25,1,@FourTankSystem,t0,tf,xs,us,d,p);
 
 % 50% F1 response
-[T50_1, H50_1] = stepResponseSimulation(1.5,1,@FourTankSystem,t0,tf_,xs,us,d,p);
+[T50_1, H50_1] = stepResponseSimulation(1.5,1,@FourTankSystem,t0,tf,xs,us,d,p);
 
 fig = figure;
 
@@ -78,13 +78,13 @@ saveas(fig, '../Exam project/Figures/deterministic_f1.png')
 
 %% F2 RESPONSES
 % 10% F2 response
-[T10_2, H10_2] = stepResponseSimulation(1.1,2,@FourTankSystem,t0,tf_,xs,us,d,p);
+[T10_2, H10_2] = stepResponseSimulation(1.1,2,@FourTankSystem,t0,tf,xs,us,d,p);
 
 % 25% F2 response
-[T25_2, H25_2] = stepResponseSimulation(1.25,2,@FourTankSystem,t0,tf_,xs,us,d,p);
+[T25_2, H25_2] = stepResponseSimulation(1.25,2,@FourTankSystem,t0,tf,xs,us,d,p);
 
 % 50% F2 response
-[T50_2, H50_2] = stepResponseSimulation(1.5,2,@FourTankSystem,t0,tf_,xs,us,d,p);
+[T50_2, H50_2] = stepResponseSimulation(1.5,2,@FourTankSystem,t0,tf,xs,us,d,p);
 
 fig = figure;
 subplot(2,2,3);
@@ -303,9 +303,9 @@ T2L(param_names, trans_fun, Mat, '../Exam project/Tables/params_sim.tex');
 %% Find linear model from param estimates
 tol = 1e-5;
 
-[Ad11,Bd11,Cd11,Dd11,sH11] = mimoctf2dss({num_11},{den_11(2:3)},1,Ts,tf_,tol);
+[Ad11,Bd11,Cd11,Dd11,sH11] = mimoctf2dss({num_11},{den_11(2:3)},1,Ts,tf,tol);
 
-[Ad22,Bd22,Cd22,Dd22,sH22] = mimoctf2dss({num_22},{den_22(2:3)},1,Ts,tf_,tol);
+[Ad22,Bd22,Cd22,Dd22,sH22] = mimoctf2dss({num_22},{den_22(2:3)},1,Ts,tf,tol);
 
 %% Find the last params
 [r_13, den_13, num_13, s_13, ts_13] = find_transfer_params(H10_1(:,3), Ts);
@@ -315,33 +315,12 @@ tol = 1e-5;
 [r_24, den_24, num_24, s_24, ts_24] = find_transfer_params(H10_2(:,4), Ts);
 
 %% MIMO
-% numerators = [{num_11}, {num_12}, {num_13}, {num_14}; {num_21}, {num_22}, {num_23}, {num_24}];
-% denominators = [{den_11}, {den_12}, {den_13}, {den_14}; {den_21}, {den_22}, {den_23}, {den_24}];
-numerators = [{num_11}, {num_12}; {num_21}, {num_22}];
-denominators = [{den_11}, {den_12}; {den_21}, {den_22}];
-t_delays = zeros(1,2);
+numerators = [{num_11}, {num_12}, {num_13}, {num_14}; {num_21}, {num_22}, {num_23}, {num_24}];
+denominators = [{den_11}, {den_12}, {den_13}, {den_14}; {den_21}, {den_22}, {den_23}, {den_24}];
+t_delays = zeros(2,2);
 
-[Ad,Bd,Cd,Dd,sH] = mimoctf2dss(numerators,denominators,t_delays,Ts,tf_,tol);
+[Ad,Bd,Cd,Dd,sH] = mimoctf2dss(numerators,denominators,t_delays,Ts,tf,tol);
 % [Ad21,Bd21,Cd21,Dd21,sH21] = mimoctf2dss({num_21},{den_21},1,Ts,tf,tol);
 
-[Ad11,Bd11,Cd11,Dd11,l11] = sisoctf2dss(num_11,den_11,0,Ts);
-[Ad12,Bd12,Cd12,Dd12,l12] = sisoctf2dss(num_12,den_12,0,Ts);
-[Ad13,Bd13,Cd13,Dd13,l13] = sisoctf2dss(num_13,den_13,0,Ts);
-[Ad14,Bd14,Cd14,Dd14,l14] = sisoctf2dss(num_14,den_14,0,Ts);
-[Ad21,Bd21,Cd21,Dd21,l21] = sisoctf2dss(num_21,den_21,0,Ts);
-[Ad22,Bd22,Cd22,Dd22,l22] = sisoctf2dss(num_22,den_22,0,Ts);
-[Ad23,Bd23,Cd23,Dd23,l23] = sisoctf2dss(num_23,den_23,0,Ts);
-[Ad24,Bd24,Cd24,Dd24,l24] = sisoctf2dss(num_24,den_24,0,Ts);
-
-A = [Ad11(1,1), Ad12(2,1); Ad21(2,1), Ad22(1,1)];
-
-%%
-% nums = [{num_11}, {num_12}, {num_13}, {num_14}; {num_21}, {num_22}, {num_23}, {num_24}];
-% dens = [{den_11}, {den_12}, {den_13}, {den_14}; {den_21}, {den_22}, {den_23}, {den_24}];
-nums = [{num_11}, {num_12}; {num_21}, {num_22}];
-dens = [{den_11}, {den_12}; {den_21}, {den_22}];
-% nums = {[1 -1] [1 7.5];[1 0] 6.5};
-%dens = [1 1 6.5];
-systf = tf(nums',dens',Ts);
-sysss = ss(systf);
+sisoctf2dss(num_11,den_11,1,Ts,tf,tol);
 
