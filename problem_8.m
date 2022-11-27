@@ -95,6 +95,7 @@ end
 % First define the target values 
 R = 40*ones(2, (tf_-t0)/Ts);
 
+
 % I currently set all W to just be identity matrices
 Wz = 500*eye(dim_z); 
 Wu = 1*eye(dim_u);
@@ -115,8 +116,9 @@ Phi_w = reshape(Phi_w, dim_w, N*dim_z)';
 U_bars = [250*ones(1, (tf_-t0)/Ts); 200*ones(1, (tf_-t0)/Ts)]-us;
 U_bar = reshape(U_bars(:, 1:N), [], 1);
 
-% Target heights
-% Z_bars = [35*ones(1, 70), 40*ones(1,160); 49*ones(1,230)]-ys(1:2);
+ulb = repmat([0; 0]-us, N, 1)';
+uub = 5*repmat([400; 400]-us, N, 1)';
+
 Z_bars = [35*ones(1, 75), 45*ones(1,155); 50*ones(1,150), 30*ones(1,80)]-ys(1:2);
 
 % phi_z parameters
@@ -164,12 +166,11 @@ for i=1:(tf_-t0)/Ts
 
     xdot = noisyFourTankSystem(0,X(:,i)+xs,U(1:dim_u,1)+us,Rdd,d,p);
     X(:, i+1) = X(:, i) + Ts*xdot;
-    X(:, i+1) = max(X(:, i+1), zeros(4,1));
     Y(:, i) = FourTankSystemSensor(X(:, i+1), p)+ Rvv*randn(4,1);
 
     [xk, wk] = stationaryKalmanFilter(X(:, i), U(1:dim_u), wk, Y(:, i), Ad, Bd, Cd, Ed, P, Rvv, S);
-    U = unconstrainedOptimization(xk, wk, U(1:dim_u), Z_bar, Mdu, H_z, H_u, H_du, g_u, rho_u, WI, gz_mat, rhoz_mat, Phi_x, Phi_w, N);
-    % U = unconstrainedOptimization(X(:, i), wk, U(1:dim_u), Z_bar, Mdu, H_z, H_u, H_du, g_u, rho_u, WI, gz_mat, rhoz_mat, Phi_x, Phi_w, N);
+    U = constrainedOptimization(xk, wk, U(1:dim_u), ulb, uub, Z_bar, Mdu, H_z, H_u, H_du, g_u, rho_u, WI, gz_mat, rhoz_mat, Phi_x, Phi_w, N);
+    % U = constrainedOptimization(X(:, i), wk, U(1:dim_u), Z_bar, Mdu, H_z, H_u, H_du, g_u, rho_u, WI, gz_mat, rhoz_mat, Phi_x, Phi_w, N);
     U_realized(:, i) = U(1:dim_u);
 
 end
@@ -179,6 +180,8 @@ figure;
 plot(t0:Ts:(tf_-Ts), U_realized(1, :)+us(1), '-b');
 hold on;
 plot(t0:Ts:(tf_-Ts), U_bars(1, :)+us(1), '--r');
+plot([t0,tf_], [uub(1), uub(1)]+us(1), '--g');
+plot([t0,tf_], [ulb(1), ulb(1)]+us(1), '--g');
 hold off;
 legend('Actual', 'Target')
 title('Input variable 1 over time');
@@ -187,6 +190,8 @@ figure;
 plot(t0:Ts:(tf_-Ts), U_realized(2, :)+us(2), '-b');
 hold on;
 plot(t0:Ts:(tf_-Ts), U_bars(2, :)+us(2), '--r');
+plot([t0,tf_], [uub(2), uub(2)]+us(2), '--g');
+plot([t0,tf_], [ulb(2), ulb(2)]+us(2), '--g');
 hold off;
 legend('Actual', 'Target')
 title('Input variable 2 over time');
