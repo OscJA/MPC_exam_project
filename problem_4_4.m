@@ -102,4 +102,17 @@ M = expm([A, B, E; zeros(4,8)]*dt);
 Ad = M(1:4, 1:4);
 Bd = M(1:4, 5:6);
 Ed = M(1:4, 7:8);
+Cd = C;
+
+%% Markov parameters
+N = 5;
+H = zeros(4, 2, N+1);
+H(:, :, 1) = Ed;
+% Obs_matrix = zeros(4, 2, N+1);
+Obs_matrix = Cd;
+for i=1:N
+    Obs_matrix = Obs_matrix*Ad;
+    H(:, :, i+1) = Obs_matrix*Bd;
+end
+
 
