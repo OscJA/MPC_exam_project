@@ -155,7 +155,7 @@ S = zeros(dim_w, dim_x);
 % Find P
 P = dlyap(Ad,Ed*Rdd*Ed');
 
-U = [300; 300];
+U = [0; 0];
 U_realized(:, 1) = U;
 
 for i=1:(tf_-t0)/Ts
@@ -167,8 +167,8 @@ for i=1:(tf_-t0)/Ts
     X(:, i+1) = max(X(:, i+1), zeros(4,1));
     Y(:, i) = FourTankSystemSensor(X(:, i+1), p)+ Rvv*randn(4,1);
 
-    [xk, wk] = stationaryKalmanFilter(X(:, i), U(1:dim_u), wk, Y(:, i), Ad, Bd, Cd, Ed, P, Rvv, S);
-    U = unconstrainedOptimization(xk, wk, U(1:dim_u), Z_bar, Mdu, H_z, H_u, H_du, g_u, rho_u, WI, gz_mat, rhoz_mat, Phi_x, Phi_w, N);
+    % [xk, wk] = stationaryKalmanFilter(X(:, i), U(1:dim_u), wk, Y(:, i), Ad, Bd, Cd, Ed, P, Rvv, S);
+    U = unconstrainedOptimization(X(:, i), wk, U(1:dim_u), Z_bar, Mdu, H_z, H_u, H_du, g_u, rho_u, WI, gz_mat, rhoz_mat, Phi_x, Phi_w, N);
     % U = unconstrainedOptimization(X(:, i), wk, U(1:dim_u), Z_bar, Mdu, H_z, H_u, H_du, g_u, rho_u, WI, gz_mat, rhoz_mat, Phi_x, Phi_w, N);
     U_realized(:, i) = U(1:dim_u);
 

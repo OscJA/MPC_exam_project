@@ -94,8 +94,8 @@ Bd1 = M(1:4, 5:6);
 E = [
     0, 0;
     0, 0;
-    rho*d(1), 0;
-    0, rho*d(2)
+    rho, 0;
+    0, rho
     ];
 
 M = expm([A, B, E; zeros(4,8)]*dt);

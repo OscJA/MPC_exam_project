@@ -315,13 +315,22 @@ tol = 1e-5;
 [r_24, den_24, num_24, s_24, ts_24] = find_transfer_params(H10_2(:,4), Ts);
 
 %% MIMO
-% numerators = [{num_11}, {num_12}, {num_13}, {num_14}; {num_21}, {num_22}, {num_23}, {num_24}];
-% denominators = [{den_11}, {den_12}, {den_13}, {den_14}; {den_21}, {den_22}, {den_23}, {den_24}];
-numerators = [{num_11}, {num_12}; {num_21}, {num_22}];
-denominators = [{den_11}, {den_12}; {den_21}, {den_22}];
-t_delays = zeros(1,2);
+numerators = [{num_11}, {num_12}, {num_13}, {num_14}; {num_21}, {num_22}, {num_23}, {num_24}]';
+denominators = [{den_11}, {den_12}, {den_13}, {den_14}; {den_21}, {den_22}, {den_23}, {den_24}]';
+% numerators = [{num_11}, {num_12}; {num_21}, {num_22}];
+% denominators = [{den_11}, {den_12}; {den_21}, {den_22}];
+t_delays = zeros(2,4)';
 
 [Ad,Bd,Cd,Dd,sH] = mimoctf2dss(numerators,denominators,t_delays,Ts,tf_,tol);
+
+% This plots the step response for tank 1. Add numerators and denominators
+% for tank3 and tank4 in the above lines, and then you have the impulse
+% responses for all tanks in this case. The impulse responses are also the
+% Markov parameters in some way.
+N = tf_/Ts;
+H = mimodss2dimpulse(Ad,Bd,Cd,Dd,N);
+plot(reshape(H(1,1,:), 1, []))
+
 % [Ad21,Bd21,Cd21,Dd21,sH21] = mimoctf2dss({num_21},{den_21},1,Ts,tf,tol);
 
 [Ad11,Bd11,Cd11,Dd11,l11] = sisoctf2dss(num_11,den_11,0,Ts);

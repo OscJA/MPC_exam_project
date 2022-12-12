@@ -116,12 +116,12 @@ Phi_w = reshape(Phi_w, dim_w, N*dim_z)';
 U_bars = [250*ones(1, (tf_-t0)/Ts); 200*ones(1, (tf_-t0)/Ts)]-us;
 U_bar = reshape(U_bars(:, 1:N), [], 1);
 
-ulb = repmat([0; 0]-us, N, 1)';
-uub = 5*repmat([400; 400]-us, N, 1)';
-dU_min = repmat([-50; -50], N, 1)';
-dU_max = repmat([50; 50], N, 1)';
+ulb = repmat([0; 0]-us, 3*N, 1);
+uub = [repmat([500; 500]-us, N, 1); inf*ones(2*dim_z*N, 1)];
+dU_min = repmat([-50; -50], N, 1);
+dU_max = repmat([50; 50], N, 1);
 
-Z_bars = [35*ones(1, 75), 45*ones(1,155); 50*ones(1,150), 30*ones(1,80)]-ys(1:2);
+Z_bars = [35*ones(1, 75), 45*ones(1,155); 50*ones(1,150), 40*ones(1,80)]-ys(1:2);
 
 % phi_z parameters
 Wz_bar = kron(eye(N), Wz);
@@ -144,6 +144,28 @@ WI = Wdu_bar*I0;
 
 wk = [0; 0];
 
+% Soft constraints variables
+A_bar = [
+    Lambda, zeros(N*dim_u, 2*N*dim_u);
+    Gamma, eye(N*dim_u), zeros(N*dim_u, N*dim_u);
+    Gamma, zeros(N*dim_u, N*dim_u), -eye(N*dim_u)
+    ];
+
+Ws1 = eye(dim_z);
+Ws2 = eye(dim_z);
+Wt1 = eye(dim_z);
+Wt2 = eye(dim_z);
+
+Ws2_bar = kron(eye(N), Ws2);
+Ws1_bar = kron(eye(N), Ws1);
+Wt2_bar = kron(eye(N), Wt2);
+Wt1_bar = kron(eye(N), Wt1);
+
+H_s = Ws2_bar'*Ws2_bar;
+H_t = Wt2_bar'*Wt2_bar;
+g_s = Ws1_bar*ones(dim_z*N, 1);
+g_t = Wt1_bar*ones(dim_z*N, 1);
+
 %% Simulate my optimization
 
 % Initiate matrices
@@ -159,19 +181,22 @@ S = zeros(dim_w, dim_x);
 % Find P
 P = dlyap(Ad,Ed*Rdd*Ed');
 
-U = [300; 300];
+U = [0; 0];
 U_realized(:, 1) = U;
 
 for i=1:(tf_-t0)/Ts
     Z_bar = Z_bars(:, i:i+N-1);
     Z_bar = reshape(Z_bar, [], 1);
-
+    
     xdot = noisyFourTankSystem(0,X(:,i)+xs,U(1:dim_u,1)+us,Rdd,d,p);
     X(:, i+1) = X(:, i) + Ts*xdot;
     Y(:, i) = FourTankSystemSensor(X(:, i+1), p)+ Rvv*randn(4,1);
 
-    [xk, wk] = stationaryKalmanFilter(X(:, i), U(1:dim_u), wk, Y(:, i), Ad, Bd, Cd, Ed, P, Rvv, S);
-    U = softConstrainedOptimization(xk, wk, U(1:dim_u), ulb, uub, A_bar, Z_bar, Mdu, H_z, H_u, H_du, g_u, rho_u, Lambda, Gamma, I0, WI, dU_min, dU_max, Rmin, Rmax, gz_mat, rhoz_mat, Phi_x, Phi_w, N);
+    % [xk, wk] = stationaryKalmanFilter(X(:, i), U(1:dim_u), wk, Y(:, i), Ad, Bd, Cd, Ed, P, Rvv, S);
+    
+    Rmin = Z_bar-2;
+    Rmax = Z_bar+2;
+    U = softConstrainedOptimization(X(:, i), wk, U(1:dim_u), ulb, uub, A_bar, Z_bar, Mdu, H_z, H_u, H_du, H_s, H_t, g_u, g_s, g_t, rho_u, Lambda, Gamma, I0, WI, dU_min, dU_max, Rmin, Rmax, gz_mat, rhoz_mat, Phi_x, Phi_w, N);
     U_realized(:, i) = U(1:dim_u);
 
 end

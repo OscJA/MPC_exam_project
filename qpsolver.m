@@ -14,7 +14,7 @@ b = [bu; -bl];
 Aeq = zeros(0, n);
 beq = zeros(0, 1);
 
-% Ensure that H is symetric
+% Ensure that H is symmetric
 H = (H+H')/2;
 
 [x, ~, ~, info] = quadprog(H, g', A, b, Aeq, beq, lb, ub, xinit);
