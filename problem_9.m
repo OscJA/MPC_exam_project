@@ -56,7 +56,7 @@ Ed = M(1:4, 7:8);
 Cd = C;
 
 %% Markov parameters
-N = 5;
+N = 15;
 dim_z = 2;
 dim_u = 2;
 dim_x = 4;
@@ -122,6 +122,7 @@ dU_min = repmat([-50; -50], N, 1);
 dU_max = repmat([50; 50], N, 1);
 
 Z_bars = [35*ones(1, 75), 45*ones(1,155); 50*ones(1,150), 40*ones(1,80)]-ys(1:2);
+Z_bars = [Z_bars, Z_bars];
 
 % phi_z parameters
 Wz_bar = kron(eye(N), Wz);

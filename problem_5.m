@@ -110,15 +110,9 @@ T = t0:Ts:tf_;
 Ypred = zeros(4, (tf_-t0)/Ts-1);
 
 for i=2:(tf_-t0)/Ts
-    % d = Q*randn(4,1);
-    % d = d(1:2);
-    % xdot = Ad*X(:,i) + Bd*U(:,i) + Ed*d;
     xdot = noisyFourTankSystem(0,X(:,i),U(:,i),Rdd,d,p);
     X(:, i+1) = X(:, i) + Ts*xdot;
     Y(:, i) = FourTankSystemSensor(X(:, i+1), p)+ Rvv*randn(4,1);
-    %[Zs, Rs, xnext, Ps] = DiscreteKalmanFilter(xnext, P, Y(:, i), Ad, Cd, G, R, Q, S, N);
-    %X_kalman = ExtendedKalmanFilter(X(:, i+1), A, N)+xs;
-    X_kalman = ExtendedKalmanFilter(FourTankSensorToState(Y(:, i), p), A, U(:,i), d, p, Ts, N);
     Y_kalman = FourTankSystemSensor(X_kalman(:,:), p);    
     Ypred(:, i-1) = Y_kalman(:, end);
     

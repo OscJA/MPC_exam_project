@@ -105,7 +105,7 @@ Ed = M(1:4, 7:8);
 Cd = C;
 
 %% Markov parameters
-N = 5;
+N = 250;
 H = zeros(4, 2, N+1);
 H(:, :, 1) = Ed;
 % Obs_matrix = zeros(4, 2, N+1);
@@ -115,4 +115,19 @@ for i=1:N
     H(:, :, i+1) = Obs_matrix*Bd;
 end
 
+figure;
+plot(reshape(H(1,1,:), 1, []))
+title('Markov Parameter 1-1')
+
+figure;
+plot(reshape(H(1,2,:), 1, []))
+title('Markov Parameter 1-2')
+
+figure;
+plot(reshape(H(4,1,:), 1, []))
+title('Markov Parameter 4-1')
+
+figure;
+plot(reshape(H(4,2,:), 1, []))
+title('Markov Parameter 4-2')
 

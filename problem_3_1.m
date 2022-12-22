@@ -329,7 +329,37 @@ t_delays = zeros(2,4)';
 % Markov parameters in some way.
 N = tf_/Ts;
 H = mimodss2dimpulse(Ad,Bd,Cd,Dd,N);
+figure;
 plot(reshape(H(1,1,:), 1, []))
+title('Markov Parameter 1-1')
+
+figure;
+plot(reshape(H(1,2,:), 1, []))
+title('Markov Parameter 1-2')
+
+% figure;
+% plot(reshape(H(2,1,:), 1, []))
+% title('Markov Parameter 2-1')
+% 
+% figure;
+% plot(reshape(H(2,2,:), 1, []))
+% title('Markov Parameter 2-2')
+% 
+% figure;
+% plot(reshape(H(3,1,:), 1, []))
+% title('Markov Parameter 3-1')
+% 
+% figure;
+% plot(reshape(H(3,2,:), 1, []))
+% title('Markov Parameter 3-2')
+
+figure;
+plot(reshape(H(4,1,:), 1, []))
+title('Markov Parameter 4-1')
+
+figure;
+plot(reshape(H(4,2,:), 1, []))
+title('Markov Parameter 4-2')
 
 % [Ad21,Bd21,Cd21,Dd21,sH21] = mimoctf2dss({num_21},{den_21},1,Ts,tf,tol);
 
