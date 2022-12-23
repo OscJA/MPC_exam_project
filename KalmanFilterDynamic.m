@@ -1,4 +1,4 @@
-function [Tkk, Xkk, Xkp1k, Ykk, Ykp1k, Pkk, Pkp1k, dkk] = KalmanFilterDynamic(Ad, Bd, Cd, T, X, Y, xs, ys, us, ds, p)
+function [Tkk, Xkk, Xkp1k, Ykk, Ykp1k, Pkk, Pkp1k, dkk] = KalmanFilterDynamic(Ad, Bd, Cd, T, X, Y, xs, ys, us, ds, Q, G, R, p)
 
 % --------------------------------------------------------------
 % Setup random values
@@ -18,7 +18,7 @@ Q = eye(nx);
 % Wz = eye(nu);
 % Wu = eye(nu);
 % Wdu = zeros(nu); %eye(nu);
-R = eye(4);
+% R = eye(4);
 
 % --------------------------------------------------------------
 % Setup matices

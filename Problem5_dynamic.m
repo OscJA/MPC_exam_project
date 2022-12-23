@@ -108,7 +108,8 @@ X = X + xs;
 
 T = t0:Tstep:tf;
 % Rvv = eye(4);
-[Tkk, Xkk, Xkp1k, Ykk, Ykp1k, P, dkk] = KalmanFilterStatic(Ad, Bd, Cd, T, X(1:4, :)', Y', xs(1:4), ys, us, ds, Qd, G, Rvv, p);
+% [Tkk, Xkk, Xkp1k, Ykk, Ykp1k, P, dkk] = KalmanFilterStatic(Ad, Bd, Cd, T, X(1:4, :)', Y', xs(1:4), ys, us, ds, Qd, G, Rvv, p);
+[Tkk, Xkk, Xkp1k, Ykk, Ykp1k, Pkk, Pkp1k, dkk] = KalmanFilterDynamic(Ad, Bd, Cd, T, X(1:4, :)', Y', xs(1:4), ys, us, ds, Qd, G, Rvv, p);
 
 fig = figure;
 plot(t0:Tstep:(tf-Tstep), Y(3,:));

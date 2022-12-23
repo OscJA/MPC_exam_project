@@ -1,5 +1,5 @@
 clear;
-close all;
+% close all;
 addpath("../Realization/")
 
 %% Set up the system

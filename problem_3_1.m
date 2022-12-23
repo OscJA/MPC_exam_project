@@ -329,37 +329,61 @@ t_delays = zeros(2,4)';
 % Markov parameters in some way.
 N = tf_/Ts;
 H = mimodss2dimpulse(Ad,Bd,Cd,Dd,N);
-figure;
-plot(reshape(H(1,1,:), 1, []))
-title('Markov Parameter 1-1')
+fig = figure;
+plot(reshape(H(1,1,:), 1, []), 'LineWidth', 2)
+set(gca, "FontSize", 14)
+title('$H_{11}$', 'FontSize', 20)
+xlabel('Time step', 'FontSize', 16)
+saveas(fig, '../Exam project/Figures/deterministic_H11.png')
 
-figure;
-plot(reshape(H(1,2,:), 1, []))
-title('Markov Parameter 1-2')
+fig = figure;
+plot(reshape(H(1,2,:), 1, []), 'LineWidth', 2)
+set(gca, "FontSize", 14)
+title('$H_{12}$', 'FontSize', 20)
+xlabel('Time step', 'FontSize', 16)
+saveas(fig, '../Exam project/Figures/deterministic_H12.png')
 
-% figure;
-% plot(reshape(H(2,1,:), 1, []))
-% title('Markov Parameter 2-1')
-% 
-% figure;
-% plot(reshape(H(2,2,:), 1, []))
-% title('Markov Parameter 2-2')
-% 
-% figure;
-% plot(reshape(H(3,1,:), 1, []))
-% title('Markov Parameter 3-1')
-% 
-% figure;
-% plot(reshape(H(3,2,:), 1, []))
-% title('Markov Parameter 3-2')
+fig = figure;
+plot(reshape(H(2,1,:), 1, []), 'LineWidth', 2)
+set(gca, "FontSize", 14)
+title('$H_{21}$', 'FontSize', 20)
+xlabel('Time step', 'FontSize', 16)
+saveas(fig, '../Exam project/Figures/deterministic_H21.png')
 
-figure;
-plot(reshape(H(4,1,:), 1, []))
-title('Markov Parameter 4-1')
+fig = figure;
+plot(reshape(H(2,2,:), 1, []), 'LineWidth', 2)
+set(gca, "FontSize", 14)
+title('$H_{22}$', 'FontSize', 20)
+xlabel('Time step', 'FontSize', 16)
+saveas(fig, '../Exam project/Figures/deterministic_H22.png')
 
-figure;
-plot(reshape(H(4,2,:), 1, []))
-title('Markov Parameter 4-2')
+fig = figure;
+plot(reshape(H(3,1,:), 1, []), 'LineWidth', 2)
+set(gca, "FontSize", 14)
+title('$H_{31}$', 'FontSize', 20)
+xlabel('Time step', 'FontSize', 16)
+saveas(fig, '../Exam project/Figures/deterministic_H31.png')
+
+fig = figure;
+plot(reshape(H(3,2,:), 1, []), 'LineWidth', 2)
+set(gca, "FontSize", 14)
+title('$H_{32}$', 'FontSize', 20)
+xlabel('Time step', 'FontSize', 16)
+saveas(fig, '../Exam project/Figures/deterministic_H32.png')
+
+fig = figure;
+plot(reshape(H(4,1,:), 1, []), 'LineWidth', 2)
+set(gca, "FontSize", 14)
+title('$H_{41}$', 'FontSize', 20)
+xlabel('Time step', 'FontSize', 16)
+saveas(fig, '../Exam project/Figures/deterministic_H41.png')
+
+fig = figure;
+plot(reshape(H(4,2,:), 1, []), 'LineWidth', 2)
+set(gca, "FontSize", 14)
+title('$H_{42}$', 'FontSize', 20)
+xlabel('Time step', 'FontSize', 16)
+saveas(fig, '../Exam project/Figures/deterministic_H42.png')
 
 % [Ad21,Bd21,Cd21,Dd21,sH21] = mimoctf2dss({num_21},{den_21},1,Ts,tf,tol);
 

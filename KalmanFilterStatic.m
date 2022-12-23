@@ -1,4 +1,4 @@
-function [Tkk, Xkk, Xkp1k, Ykk, Ykp1k, P, dkk] = KalmanFilterStatic(Ad, Bd, Cd, T, X, Y, xs, ys, us, ds, p)
+function [Tkk, Xkk, Xkp1k, Ykk, Ykp1k, P, dkk] = KalmanFilterStatic(Ad, Bd, Cd, T, X, Y, xs, ys, us, ds, Qd, G, R, p)
 
 % --------------------------------------------------------------
 % Setup random values
@@ -9,16 +9,17 @@ if nx_diff > 2
     ds = [zeros(nx_diff-2,1); ds];
 end
 %nu = 2;
-G = eye(nx);
+% G = eye(nx);
 % Qz = eye(nu); %diag([1,1]);
 S = zeros(nx,4);
 %Rvv = eye(nx);
-Q = eye(nx);
+% Q = eye(nx);
+Q = Qd;
 %Rwv = zeros(nx);
 % Wz = eye(nu);
 % Wu = eye(nu);
 % Wdu = zeros(nu); %eye(nu);
-R = eye(4);
+% R = eye(4);
 
 % --------------------------------------------------------------
 % Setup matices

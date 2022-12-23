@@ -107,27 +107,70 @@ Cd = C;
 %% Markov parameters
 N = 250;
 H = zeros(4, 2, N+1);
-H(:, :, 1) = Ed;
+H(:, :, 1) = zeros(4, 2);
 % Obs_matrix = zeros(4, 2, N+1);
 Obs_matrix = Cd;
 for i=1:N
     Obs_matrix = Obs_matrix*Ad;
     H(:, :, i+1) = Obs_matrix*Bd;
 end
+Dd = zeros(4, 2);
+H = mimodss2dimpulse(Ad,Bd,Cd,Dd,N);
 
-figure;
-plot(reshape(H(1,1,:), 1, []))
-title('Markov Parameter 1-1')
 
-figure;
-plot(reshape(H(1,2,:), 1, []))
-title('Markov Parameter 1-2')
+fig = figure;
+plot(reshape(H(1,1,:), 1, []), 'LineWidth', 2)
+set(gca, "FontSize", 14)
+title('$H_{11}$', 'FontSize', 20)
+xlabel('Time step', 'FontSize', 16)
+saveas(fig, '../Exam project/Figures/linear_H11.png')
 
-figure;
-plot(reshape(H(4,1,:), 1, []))
-title('Markov Parameter 4-1')
+fig = figure;
+plot(reshape(H(1,2,:), 1, []), 'LineWidth', 2)
+set(gca, "FontSize", 14)
+title('$H_{12}$', 'FontSize', 20)
+xlabel('Time step', 'FontSize', 16)
+saveas(fig, '../Exam project/Figures/linear_H12.png')
 
-figure;
-plot(reshape(H(4,2,:), 1, []))
-title('Markov Parameter 4-2')
+fig = figure;
+plot(reshape(H(2,1,:), 1, []), 'LineWidth', 2)
+set(gca, "FontSize", 14)
+title('$H_{21}$', 'FontSize', 20)
+xlabel('Time step', 'FontSize', 16)
+saveas(fig, '../Exam project/Figures/linear_H21.png')
+
+fig = figure;
+plot(reshape(H(2,2,:), 1, []), 'LineWidth', 2)
+set(gca, "FontSize", 14)
+title('$H_{22}$', 'FontSize', 20)
+xlabel('Time step', 'FontSize', 16)
+saveas(fig, '../Exam project/Figures/linear_H22.png')
+
+fig = figure;
+plot(reshape(H(3,1,:), 1, []), 'LineWidth', 2)
+set(gca, "FontSize", 14)
+title('$H_{31}$', 'FontSize', 20)
+xlabel('Time step', 'FontSize', 16)
+saveas(fig, '../Exam project/Figures/linear_H31.png')
+
+fig = figure;
+plot(reshape(H(3,2,:), 1, []), 'LineWidth', 2)
+set(gca, "FontSize", 14)
+title('$H_{32}$', 'FontSize', 20)
+xlabel('Time step', 'FontSize', 16)
+saveas(fig, '../Exam project/Figures/linear_H32.png')
+
+fig = figure;
+plot(reshape(H(4,1,:), 1, []), 'LineWidth', 2)
+set(gca, "FontSize", 14)
+title('$H_{41}$', 'FontSize', 20)
+xlabel('Time step', 'FontSize', 16)
+saveas(fig, '../Exam project/Figures/linear_H41.png')
+
+fig = figure;
+plot(reshape(H(4,2,:), 1, []), 'LineWidth', 2)
+set(gca, "FontSize", 14)
+title('$H_{42}$', 'FontSize', 20)
+xlabel('Time step', 'FontSize', 16)
+saveas(fig, '../Exam project/Figures/linear_H42.png')
 
