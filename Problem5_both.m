@@ -105,14 +105,21 @@ X = X + xs;
 
 T = t0:Tstep:tf;
 
-%% Dynamic Kalman filter
-[Tkk, Xkk, Xkp1k, Ykk, Ykp1k, Pkk, Pkp1k, dkk] = KalmanFilterDynamic(Ad, Bd, Cd, T, X', Y', xs, ys, us, ds, Qd, G, Rvv, p);
+
+%% STEP CHANGE
+% Dynamic Kalman filter
+[TkkDyn, XkkDyn, Xkp1k, YkkDyn, Ykp1k, Pkk, Pkp1k, dkk] = KalmanFilterDynamic(Ad, Bd, Cd, T, X', Y', xs, ys, us, ds, Qd, G, Rvv, p);
+
+% Static Kalman filter
+[TkkStat, XkkStat, Xkp1k, YkkStat, Ykp1k, P, dkk] = KalmanFilterStatic(Ad, Bd, Cd, T, X(:, :)', Y', xs(:), ys, us, ds, Qd, G, eye(4), p);
+
 
 fig = figure('Position', [500 250 750 500]);
 subplot(2, 2, 3)
 plot(t0:Tstep:(tf-Tstep), Y(1,:));
 hold on;
-plot(Tkk(2:end), Ykk(:, 1), 'r');
+plot(TkkDyn(1:end-1), YkkDyn(:, 1));
+plot(TkkStat(1:end-1), YkkStat(:, 1));
 hold off;
 xlabel("Time");
 ylabel("Height");
@@ -121,18 +128,19 @@ title('Tank 1');
 subplot(2, 2, 4)
 plot(t0:Tstep:(tf-Tstep), Y(2,:));
 hold on;
-plot(Tkk(2:end), Ykk(:, 2), 'r');
+plot(TkkDyn(1:end-1), YkkDyn(:, 2));
+plot(TkkStat(1:end-1), YkkStat(:, 2));
 hold off;
 xlabel("Time");
 ylabel("Height");
-legend("Measured heights", "Kalman filter prediction", "Location", "SouthEast")
+legend("Measured heights", "Dynamic Kalman prediction", "Static Kalman prediction", "Location", "SouthEast")
 title('Tank 2');
 
 subplot(2, 2, 1)
 plot(t0:Tstep:(tf-Tstep), Y(3,:));
 hold on;
-% plot((t0+2*Tstep):Tstep:tf, Ykk(:, 3), 'r');
-plot(Tkk(2:end), Ykk(:, 3), 'r');
+plot(TkkDyn(1:end-1), YkkDyn(:, 3));
+plot(TkkStat(1:end-1), YkkStat(:, 3));
 hold off;
 xlabel("Time");
 ylabel("Height");
@@ -141,19 +149,21 @@ title('Tank 3');
 subplot(2, 2, 2)
 plot(t0:Tstep:(tf-Tstep), Y(4,:));
 hold on;
-% plot((t0+2*Tstep):Tstep:tf, Ykk(:, 4), 'r');
-plot(Tkk(2:end), Ykk(:, 4), 'r');
+plot(TkkDyn(1:end-1), YkkDyn(:, 4), 'r');
+plot(TkkStat(1:end-1), YkkStat(:, 4), 'y');
 hold off;
 xlabel("Time");
 ylabel("Height");
 title('Tank 4');
-saveas(fig, '../Exam project/Figures/Dynamic_kalman.png')
+
+saveas(fig, '../Exam project/Figures/kalman.png')
 
 fig = figure;
 subplot(2, 1, 1)
-plot(t0:Tstep:(tf-Tstep), cumsum(Delta_d(1, :)), '--b');
+plot(t0:Tstep:(tf-Tstep), zeros(225, 1), '--b');
 hold on;
-plot((t0+Tstep):Tstep:(tf-Tstep), Xkk(:,5), 'r');
+plot((t0+Tstep):Tstep:(tf-Tstep), XkkDyn(:,5), 'r');
+plot((t0+Tstep):Tstep:(tf-Tstep), XkkStat(:,5), 'y');
 plot(t0:Tstep:(tf-Tstep), X(5,:), 'g');
 hold off;
 xlabel("Time", 'FontSize', 12);
@@ -161,79 +171,18 @@ ylabel("flow", 'FontSize', 12);
 title("$F_3$", 'FontSize', 15);
 
 subplot(2, 1, 2)
-plot(t0:Tstep:(tf-Tstep), cumsum(Delta_d(2, :)), '--b');
+plot(t0:Tstep:(tf-Tstep), zeros(225, 1), '--b');
 hold on;
-plot((t0+Tstep):Tstep:(tf-Tstep), Xkk(:,6), 'r');
+plot((t0+Tstep):Tstep:(tf-Tstep), XkkDyn(:,6), 'r');
+plot((t0+Tstep):Tstep:(tf-Tstep), XkkStat(:,6), 'y');
 plot(t0:Tstep:(tf-Tstep), X(6,:), 'g');
 hold off;
 xlabel("Time", 'FontSize', 12);
 ylabel("flow", 'FontSize', 12);
 title("$F_4$", 'FontSize', 15);
-saveas(fig, '../Exam project/Figures/Dynamic_kalman_disturbances.png')
+saveas(fig, '../Exam project/Figures/kalman_disturbances.png')
 
-%% Static Kalman filter
-[Tkk, Xkk, Xkp1k, Ykk, Ykp1k, P, dkk] = KalmanFilterStatic(Ad, Bd, Cd, T, X(:, :)', Y', xs(:), ys, us, ds, Qd, G, eye(4), p);
 
-fig = figure('Position', [500 250 750 500]);
-subplot(2, 2, 3)
-plot(t0:Tstep:(tf-Tstep), Y(1,:));
-hold on;
-plot(Tkk(2:end), Ykk(:, 1), 'r');
-hold off;
-xlabel("Time");
-ylabel("Height");
-title('Tank 1');
-
-subplot(2, 2, 4)
-plot(t0:Tstep:(tf-Tstep), Y(2,:));
-hold on;
-plot(Tkk(2:end), Ykk(:, 2), 'r');
-hold off;
-xlabel("Time");
-ylabel("Height");
-legend("Measured heights", "Kalman filter prediction", "Location", "SouthEast")
-title('Tank 2');
-
-subplot(2, 2, 1)
-plot(t0:Tstep:(tf-Tstep), Y(3,:));
-hold on;
-plot(Tkk(2:end), Ykk(:, 3), 'r');
-hold off;
-xlabel("Time");
-ylabel("Height");
-title('Tank 3');
-
-subplot(2, 2, 2)
-plot(t0:Tstep:(tf-Tstep), Y(4,:));
-hold on;
-plot(Tkk(2:end), Ykk(:, 4), 'r');
-hold off;
-xlabel("Time");
-ylabel("Height");
-title('Tank 4');
-saveas(fig, '../Exam project/Figures/Static_kalman.png')
-
-fig = figure;
-subplot(2, 1, 1)
-plot(t0:Tstep:(tf-Tstep), cumsum(Delta_d(1, :)), '--b');
-hold on;
-plot((t0+Tstep):Tstep:(tf-Tstep), Xkk(:,5), 'r');
-plot(t0:Tstep:(tf-Tstep), X(5,:), 'g');
-hold off;
-xlabel("Time", 'FontSize', 12);
-ylabel("flow", 'FontSize', 12);
-title("$F_3$", 'FontSize', 15);
-
-subplot(2, 1, 2)
-plot(t0:Tstep:(tf-Tstep), cumsum(Delta_d(2, :)), '--b');
-hold on;
-plot((t0+Tstep):Tstep:(tf-Tstep), Xkk(:,6), 'r');
-plot(t0:Tstep:(tf-Tstep), X(6,:), 'g');
-hold off;
-xlabel("Time", 'FontSize', 12);
-ylabel("flow", 'FontSize', 12);
-title("$F_4$", 'FontSize', 15);
-saveas(fig, '../Exam project/Figures/Static_kalman_disturbances.png')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -253,14 +202,18 @@ X = X + xs;
 
 T = t0:Tstep:tf;
 
-%% Dynamic Kalman filter
-[Tkk, Xkk, Xkp1k, Ykk, Ykp1k, Pkk, Pkp1k, dkk] = KalmanFilterDynamic(Ad, Bd, Cd, T, X', Y', xs, ys, us, ds, Qd, G, Rvv, p);
+% Dynamic Kalman filter
+[TkkDyn, XkkDyn, Xkp1k, YkkDyn, Ykp1k, Pkk, Pkp1k, dkk] = KalmanFilterDynamic(Ad, Bd, Cd, T, X', Y', xs, ys, us, ds, Qd, G, Rvv, p);
+
+% Static Kalman filter
+[TkkStat, XkkStat, Xkp1k, YkkStat, Ykp1k, P, dkk] = KalmanFilterStatic(Ad, Bd, Cd, T, X(:, :)', Y', xs(:), ys, us, ds, Qd, G, eye(4), p);
 
 fig = figure('Position', [500 250 750 500]);
 subplot(2, 2, 3)
 plot(t0:Tstep:(tf-Tstep), Y(1,:));
 hold on;
-plot(Tkk(1:end-1), Ykk(:, 1), 'r');
+plot(TkkDyn(1:end-1), YkkDyn(:, 1));
+plot(TkkStat(1:end-1), YkkStat(:, 1));
 hold off;
 xlabel("Time");
 ylabel("Height");
@@ -269,17 +222,19 @@ title('Tank 1');
 subplot(2, 2, 4)
 plot(t0:Tstep:(tf-Tstep), Y(2,:));
 hold on;
-plot(Tkk(1:end-1), Ykk(:, 2), 'r');
+plot(TkkDyn(1:end-1), YkkDyn(:, 2));
+plot(TkkStat(1:end-1), YkkStat(:, 2));
 hold off;
 xlabel("Time");
 ylabel("Height");
-legend("Measured heights", "Kalman filter prediction", "Location", "SouthEast")
+legend("Measured heights", "Dynamic Kalman prediction", "Static Kalman prediction", "Location", "SouthEast")
 title('Tank 2');
 
 subplot(2, 2, 1)
 plot(t0:Tstep:(tf-Tstep), Y(3,:));
 hold on;
-plot(Tkk(1:end-1), Ykk(:, 3), 'r');
+plot(TkkDyn(1:end-1), YkkDyn(:, 3));
+plot(TkkStat(1:end-1), YkkStat(:, 3));
 hold off;
 xlabel("Time");
 ylabel("Height");
@@ -288,18 +243,20 @@ title('Tank 3');
 subplot(2, 2, 2)
 plot(t0:Tstep:(tf-Tstep), Y(4,:));
 hold on;
-plot(Tkk(1:end-1), Ykk(:, 4), 'r');
+plot(TkkDyn(1:end-1), YkkDyn(:, 4), 'r');
+plot(TkkStat(1:end-1), YkkStat(:, 4), 'y');
 hold off;
 xlabel("Time");
 ylabel("Height");
 title('Tank 4');
-saveas(fig, '../Exam project/Figures/nostep_Dynamic_kalman.png')
+saveas(fig, '../Exam project/Figures/nostep_kalman.png')
 
 fig = figure;
 subplot(2, 1, 1)
 plot(t0:Tstep:(tf-Tstep), zeros(225, 1), '--b');
 hold on;
-plot((t0+Tstep):Tstep:(tf-Tstep), Xkk(:,5), 'r');
+plot((t0+Tstep):Tstep:(tf-Tstep), XkkDyn(:,5), 'r');
+plot((t0+Tstep):Tstep:(tf-Tstep), XkkStat(:,5), 'y');
 plot(t0:Tstep:(tf-Tstep), X(5,:), 'g');
 hold off;
 xlabel("Time", 'FontSize', 12);
@@ -309,76 +266,12 @@ title("$F_3$", 'FontSize', 15);
 subplot(2, 1, 2)
 plot(t0:Tstep:(tf-Tstep), zeros(225, 1), '--b');
 hold on;
-plot((t0+Tstep):Tstep:(tf-Tstep), Xkk(:,6), 'r');
+plot((t0+Tstep):Tstep:(tf-Tstep), XkkDyn(:,6), 'r');
+plot((t0+Tstep):Tstep:(tf-Tstep), XkkStat(:,6), 'y');
 plot(t0:Tstep:(tf-Tstep), X(6,:), 'g');
 hold off;
 xlabel("Time", 'FontSize', 12);
 ylabel("flow", 'FontSize', 12);
 title("$F_4$", 'FontSize', 15);
-saveas(fig, '../Exam project/Figures/nostep_Dynamic_kalman_disturbances.png')
-
-
-%% Static Kalman filter
-[Tkk, Xkk, Xkp1k, Ykk, Ykp1k, P, dkk] = KalmanFilterStatic(Ad, Bd, Cd, T, X(:, :)', Y', xs(:), ys, us, ds, Qd, G, eye(4), p);
-
-fig = figure('Position', [500 250 750 500]);
-subplot(2, 2, 3)
-plot(t0:Tstep:(tf-Tstep), Y(1,:));
-hold on;
-plot(Tkk(1:end-1), Ykk(:, 1), 'r');
-hold off;
-xlabel("Time");
-ylabel("Height");
-title('Tank 1');
-
-subplot(2, 2, 4)
-plot(t0:Tstep:(tf-Tstep), Y(2,:));
-hold on;
-plot(Tkk(1:end-1), Ykk(:, 2), 'r');
-hold off;
-xlabel("Time");
-ylabel("Height");
-legend("Measured heights", "Kalman filter prediction", "Location", "SouthEast")
-title('Tank 2');
-
-subplot(2, 2, 1)
-plot(t0:Tstep:(tf-Tstep), Y(3,:));
-hold on;
-plot(Tkk(1:end-1), Ykk(:, 3), 'r');
-hold off;
-xlabel("Time");
-ylabel("Height");
-title('Tank 3');
-
-subplot(2, 2, 2)
-plot(t0:Tstep:(tf-Tstep), Y(4,:));
-hold on;
-plot(Tkk(1:end-1), Ykk(:, 4), 'r');
-hold off;
-xlabel("Time");
-ylabel("Height");
-title('Tank 4');
-saveas(fig, '../Exam project/Figures/nostep_Static_kalman.png')
-
-fig = figure;
-subplot(2, 1, 1)
-plot(t0:Tstep:(tf-Tstep), zeros(225, 1), '--b');
-hold on;
-plot((t0+Tstep):Tstep:(tf-Tstep), Xkk(:,5), 'r');
-plot(t0:Tstep:(tf-Tstep), X(5,:), 'g');
-hold off;
-xlabel("Time", 'FontSize', 12);
-ylabel("flow", 'FontSize', 12);
-title("$F_3$", 'FontSize', 15);
-
-subplot(2, 1, 2)
-plot(t0:Tstep:(tf-Tstep), zeros(225, 1), '--b');
-hold on;
-plot((t0+Tstep):Tstep:(tf-Tstep), Xkk(:,6), 'r');
-plot(t0:Tstep:(tf-Tstep), X(6,:), 'g');
-hold off;
-xlabel("Time", 'FontSize', 12);
-ylabel("flow", 'FontSize', 12);
-title("$F_4$", 'FontSize', 15);
-saveas(fig, '../Exam project/Figures/nostep_Static_kalman_disturbances.png')
+saveas(fig, '../Exam project/Figures/nostep_kalman_disturbances.png')
 
