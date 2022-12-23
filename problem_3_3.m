@@ -32,7 +32,7 @@ Ts = 4;
 Rvv = 0.05*eye(4);
 Rdd = 5*eye(2);
 mud = d;
-Sigma = 0.5*[zeros(4,2); eye(2)];
+Sigma = 2*[zeros(4,2); eye(2)];
 
 %% Linearize the system
 hs = ys; At = [A1; A2; A3; A4]; ap = [a1; a2; a3; a4]; gam = [gamma1; gamma2];

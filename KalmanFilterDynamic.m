@@ -9,11 +9,11 @@ if nx_diff > 2
     ds = [zeros(nx_diff-2,1); ds];
 end
 %nu = 2;
-G = eye(nx);
+% G = eye(nx);
 % Qz = eye(nu); %diag([1,1]);
 S = zeros(nx,4);
 %Rvv = eye(nx);
-Q = eye(nx);
+% Q = eye(nx);
 %Rwv = zeros(nx);
 % Wz = eye(nu);
 % Wu = eye(nu);
@@ -24,8 +24,8 @@ Q = eye(nx);
 % Setup matices
 % --------------------------------------------------------------
 N = size(X,1);
-Xkk = zeros(N-1,4);
-Xkp1k = zeros(N-1,4);
+Xkk = zeros(N-1,6);
+Xkp1k = zeros(N-1,6);
 dkk = zeros(N-1,nx_diff);
 Ykk = zeros(N-1,4);
 Ykp1k = zeros(N-1,4);
@@ -36,8 +36,7 @@ Pkp1k = cell(N-1,1);
 % --------------------------------------------------------------
 % Perform 1 iteration of dynamic Kalman filter and save in matrix
 % --------------------------------------------------------------
-dkkm1 = zeros(nx_diff,1);
-xkkm1 = [X(1,:)'-xs;dkkm1];
+xkkm1 = X(1,:)'-xs;
 pkkm1 = eye(nx);
 
 for i = 1:N-1
@@ -64,8 +63,8 @@ for i = 1:N-1
     
     % Save into matrices
     dkk(i,:) = xkp1k(5:(5+nx_diff-1))'+ds';
-    Xkk(i,:) = xkk(1:4)+xs;
-    Xkp1k(i,:) = xkp1k(1:4)'+xs';
+    Xkk(i,:) = xkk+xs;
+    Xkp1k(i,:) = xkp1k'+xs';
     Ykk(i,:) = ykk'+ys';
     Ykp1k(i,:) = ykp1k'+ys';
     Pkk{i} = pkk;

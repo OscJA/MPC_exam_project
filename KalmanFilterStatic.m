@@ -25,9 +25,11 @@ Q = Qd;
 % Setup matices
 % --------------------------------------------------------------
 N = size(X,1);
-Xkk = zeros(N-1,4);
+% Xkk = zeros(N-1,4);
+Xkk = zeros(N-1,6);
 dkk = zeros(N-1,nx_diff);
-Xkp1k = zeros(N-1,4);
+% Xkp1k = zeros(N-1,4);
+Xkp1k = zeros(N-1,6);
 Ykk = zeros(N-1,4);
 Ykp1k = zeros(N-1,4);
 Tkk = T(2:end);
@@ -43,8 +45,9 @@ Kfw = S*inv(Re);
 % --------------------------------------------------------------
 % Perform 1 step prediction of Kalman filter and save in matrix
 % --------------------------------------------------------------
-dkkm1 = zeros(nx_diff,1);
-xkkm1 = [X(1,:)'-xs;dkkm1];
+% dkkm1 = zeros(nx_diff,1);
+% xkkm1 = [X(1,:)'-xs;dkkm1];
+xkkm1 = X(1,:)'-xs;
 
 for i = 1:N-1
     % Innovation
@@ -61,8 +64,8 @@ for i = 1:N-1
     
     % Save into matrices
     dkk(i,:) = xkp1k(5:(5+nx_diff-1))'+ds';
-    Xkk(i,:) = xkk(1:4)+xs;
-    Xkp1k(i,:) = xkp1k(1:4)'+xs';
+    Xkk(i,:) = xkk(1:6)+xs;
+    Xkp1k(i,:) = xkp1k(1:6)'+xs';
     Ykk(i,:) = (ykk(1:4)+ys)';
     Ykp1k(i,:) = (ykp1k+ys)';
     

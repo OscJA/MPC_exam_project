@@ -75,9 +75,6 @@ Rdd = 0.4*eye(4);
 % G(2,2) = 0;
 G = eye(6);
 
-N = 5;
-
-
 
 X = zeros(6, Nsim);
 Y = zeros(4, Nsim);
@@ -111,28 +108,60 @@ T = t0:Tstep:tf;
 % [Tkk, Xkk, Xkp1k, Ykk, Ykp1k, P, dkk] = KalmanFilterStatic(Ad, Bd, Cd, T, X(1:4, :)', Y', xs(1:4), ys, us, ds, Qd, G, Rvv, p);
 [Tkk, Xkk, Xkp1k, Ykk, Ykp1k, Pkk, Pkp1k, dkk] = KalmanFilterDynamic(Ad, Bd, Cd, T, X(1:4, :)', Y', xs(1:4), ys, us, ds, Qd, G, Rvv, p);
 
-fig = figure;
+fig = figure('Position', [500 250 900 600]);
+subplot(2, 2, 3)
+plot(t0:Tstep:(tf-Tstep), Y(1,:));
+hold on;
+plot((t0+Tstep):Tstep:(tf-Tstep), Ykk(:, 1), 'r');
+hold off;
+xlabel("Time");
+ylabel("Height");
+title('Tank 1');
+
+subplot(2, 2, 4)
+plot(t0:Tstep:(tf-Tstep), Y(2,:));
+hold on;
+plot((t0+Tstep):Tstep:(tf-Tstep), Ykk(:, 2), 'r');
+hold off;
+xlabel("Time");
+ylabel("Height");
+legend("Measured heights", "Kalman filter prediction", "Location", "SouthEast")
+title('Tank 2');
+
+subplot(2, 2, 1)
 plot(t0:Tstep:(tf-Tstep), Y(3,:));
 hold on;
 plot((t0+Tstep):Tstep:(tf-Tstep), Ykk(:, 3), 'r');
 hold off;
+xlabel("Time");
+ylabel("Height");
+title('Tank 3');
 
-fig = figure;
-subplot(2,2,3);
-plot(t0:Tstep:(tf-Tstep), Y(1,:));
-title('Tank 1')
-
-subplot(2,2,4);
-plot(t0:Tstep:(tf-Tstep), Y(2,:));
-title('Tank 2')
-
-subplot(2,2,1);
-plot(t0:Tstep:(tf-Tstep), Y(3,:));
-title('Tank 3')
-
-subplot(2,2,2);
+subplot(2, 2, 2)
 plot(t0:Tstep:(tf-Tstep), Y(4,:));
-title('Tank 4')
+hold on;
+plot((t0+Tstep):Tstep:(tf-Tstep), Ykk(:, 4), 'r');
+hold off;
+xlabel("Time");
+ylabel("Height");
+title('Tank 4');
+
+% fig = figure;
+% subplot(2,2,3);
+% plot(t0:Tstep:(tf-Tstep), Y(1,:));
+% title('Tank 1')
+% 
+% subplot(2,2,4);
+% plot(t0:Tstep:(tf-Tstep), Y(2,:));
+% title('Tank 2')
+% 
+% subplot(2,2,1);
+% plot(t0:Tstep:(tf-Tstep), Y(3,:));
+% title('Tank 3')
+% 
+% subplot(2,2,2);
+% plot(t0:Tstep:(tf-Tstep), Y(4,:));
+% title('Tank 4')
 
 % figure;
 % plot(t0:Tstep:(tf-Tstep), Y(1,:), '-b');

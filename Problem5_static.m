@@ -108,30 +108,78 @@ X = X + xs;
 
 T = t0:Tstep:tf;
 % Rvv = eye(4);
-[Tkk, Xkk, Xkp1k, Ykk, Ykp1k, P, dkk] = KalmanFilterStatic(Ad, Bd, Cd, T, X(1:4, :)', Y', xs(1:4), ys, us, ds, Qd, G, Rvv, p);
+[Tkk, Xkk, Xkp1k, Ykk, Ykp1k, P, dkk] = KalmanFilterStatic(Ad, Bd, Cd, T, X(:, :)', Y', xs(:), ys, us, ds, Qd, G, eye(4), p);
+% [Tkk, Xkk, Xkp1k, Ykk, Ykp1k, P, dkk] = KalmanFilterStatic(Ad, Bd, Cd, T, X(:, :)', Y', xs(:), ys, us, ds, Qd, G, Rvv, p);
 
-fig = figure;
+fig = figure('Position', [500 250 900 600]);
+subplot(2, 2, 3)
+plot(t0:Tstep:(tf-Tstep), Y(1,:));
+hold on;
+plot((t0+2*Tstep):Tstep:(tf), Ykk(:, 1), 'r');
+hold off;
+xlabel("Time");
+ylabel("Height");
+title('Tank 1');
+
+subplot(2, 2, 4)
+plot(t0:Tstep:(tf-Tstep), Y(2,:));
+hold on;
+plot((t0+2*Tstep):Tstep:(tf), Ykk(:, 2), 'r');
+hold off;
+xlabel("Time");
+ylabel("Height");
+legend("Measured heights", "Kalman filter prediction", "Location", "SouthEast")
+title('Tank 2');
+
+subplot(2, 2, 1)
 plot(t0:Tstep:(tf-Tstep), Y(3,:));
 hold on;
-plot((t0+Tstep):Tstep:(tf-Tstep), Ykk(:, 3), 'r');
+plot((t0+2*Tstep):Tstep:(tf), Ykk(:, 3), 'r');
 hold off;
+xlabel("Time");
+ylabel("Height");
+title('Tank 3');
+
+subplot(2, 2, 2)
+plot(t0:Tstep:(tf-Tstep), Y(4,:));
+hold on;
+plot((t0+2*Tstep):Tstep:(tf), Ykk(:, 4), 'r');
+hold off;
+xlabel("Time");
+ylabel("Height");
+title('Tank 4');
 
 fig = figure;
-subplot(2,2,3);
-plot(t0:Tstep:(tf-Tstep), Y(1,:));
-title('Tank 1')
+subplot(2, 1, 1)
+plot(t0:Tstep:(tf-Tstep), cumsum(Delta_d(1, :)), '--r');
+hold on;
+plot(t0:Tstep:(tf-Tstep), X(5,:), 'b');
+hold off;
+title("");
 
-subplot(2,2,4);
-plot(t0:Tstep:(tf-Tstep), Y(2,:));
-title('Tank 2')
+subplot(2, 1, 2)
+plot(t0:Tstep:(tf-Tstep), cumsum(Delta_d(2, :)), '--r');
+hold on;
+plot(t0:Tstep:(tf-Tstep), X(6,:), 'b');
+hold off;
 
-subplot(2,2,1);
-plot(t0:Tstep:(tf-Tstep), Y(3,:));
-title('Tank 3')
 
-subplot(2,2,2);
-plot(t0:Tstep:(tf-Tstep), Y(4,:));
-title('Tank 4')
+% fig = figure;
+% subplot(2,2,3);
+% plot(t0:Tstep:(tf-Tstep), Y(1,:));
+% title('Tank 1')
+% 
+% subplot(2,2,4);
+% plot(t0:Tstep:(tf-Tstep), Y(2,:));
+% title('Tank 2')
+% 
+% subplot(2,2,1);
+% plot(t0:Tstep:(tf-Tstep), Y(3,:));
+% title('Tank 3')
+% 
+% subplot(2,2,2);
+% plot(t0:Tstep:(tf-Tstep), Y(4,:));
+% title('Tank 4')
 
 % figure;
 % plot(t0:Tstep:(tf-Tstep), Y(1,:), '-b');
