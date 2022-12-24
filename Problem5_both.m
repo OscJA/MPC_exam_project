@@ -114,72 +114,81 @@ T = t0:Tstep:tf;
 [TkkStat, XkkStat, Xkp1k, YkkStat, Ykp1k, P, dkk] = KalmanFilterStatic(Ad, Bd, Cd, T, X(:, :)', Y', xs(:), ys, us, ds, Qd, G, eye(4), p);
 
 
-fig = figure('Position', [500 250 750 500]);
-subplot(2, 2, 3)
+fig = figure('Position', [500 250 850 700]);
+subplot(3, 2, 3)
 plot(t0:Tstep:(tf-Tstep), Y(1,:));
 hold on;
 plot(TkkDyn(1:end-1), YkkDyn(:, 1));
 plot(TkkStat(1:end-1), YkkStat(:, 1));
 hold off;
-xlabel("Time");
-ylabel("Height");
-title('Tank 1');
+xlabel("Time", 'FontSize', 13.5);
+ylabel("Height", 'FontSize', 13.5);
+title('Tank 1', 'FontSize', 15);
 
-subplot(2, 2, 4)
+subplot(3, 2, 4)
 plot(t0:Tstep:(tf-Tstep), Y(2,:));
 hold on;
 plot(TkkDyn(1:end-1), YkkDyn(:, 2));
 plot(TkkStat(1:end-1), YkkStat(:, 2));
 hold off;
-xlabel("Time");
-ylabel("Height");
-legend("Measured heights", "Dynamic Kalman prediction", "Static Kalman prediction", "Location", "SouthEast")
-title('Tank 2');
+xlabel("Time", 'FontSize', 13.5);
+ylabel("Height", 'FontSize', 13.5);
+title('Tank 2', 'FontSize', 15);
 
-subplot(2, 2, 1)
+subplot(3, 2, 1)
 plot(t0:Tstep:(tf-Tstep), Y(3,:));
 hold on;
 plot(TkkDyn(1:end-1), YkkDyn(:, 3));
 plot(TkkStat(1:end-1), YkkStat(:, 3));
 hold off;
-xlabel("Time");
-ylabel("Height");
-title('Tank 3');
+xlabel("Time", 'FontSize', 13.5);
+ylabel("Height", 'FontSize', 13.5);
+title('Tank 3', 'FontSize', 15);
 
-subplot(2, 2, 2)
+subplot(3, 2, 2)
 plot(t0:Tstep:(tf-Tstep), Y(4,:));
 hold on;
 plot(TkkDyn(1:end-1), YkkDyn(:, 4), 'r');
 plot(TkkStat(1:end-1), YkkStat(:, 4), 'y');
 hold off;
-xlabel("Time");
-ylabel("Height");
-title('Tank 4');
+xlabel("Time", 'FontSize', 13.5);
+ylabel("Height", 'FontSize', 13.5);
+title('Tank 4', 'FontSize', 15);
+
+Lgnd = legend("Measured heights", "Dynamic Kalman prediction", "Static Kalman prediction", 'FontSize', 13);
+Lgnd.Position(1) = 0.35;
+Lgnd.Position(2) = 0.2;
 
 saveas(fig, '../Exam project/Figures/kalman.png')
 
-fig = figure;
-subplot(2, 1, 1)
-plot(t0:Tstep:(tf-Tstep), zeros(225, 1), '--b');
+fig = figure('Position', [500 250 550 550]);
+subplot(3, 1, 1)
+plot(t0:Tstep:(tf-Tstep), cumsum(Delta_d(1, :)), '--b');
 hold on;
+plot(t0:Tstep:(tf-Tstep), X(5,:), 'g');
 plot((t0+Tstep):Tstep:(tf-Tstep), XkkDyn(:,5), 'r');
 plot((t0+Tstep):Tstep:(tf-Tstep), XkkStat(:,5), 'y');
-plot(t0:Tstep:(tf-Tstep), X(5,:), 'g');
 hold off;
 xlabel("Time", 'FontSize', 12);
 ylabel("flow", 'FontSize', 12);
 title("$F_3$", 'FontSize', 15);
+ylim([min([min(XkkDyn(:,5)), min(XkkStat(:,5)), min(X(5,:))])-5, max([50, max(XkkDyn(:,5)), max(XkkStat(:,5)), max(X(5,:))])+5])
 
-subplot(2, 1, 2)
-plot(t0:Tstep:(tf-Tstep), zeros(225, 1), '--b');
+subplot(3, 1, 2)
+plot(t0:Tstep:(tf-Tstep), cumsum(Delta_d(2, :)), '--b');
 hold on;
+plot(t0:Tstep:(tf-Tstep), X(6,:), 'g');
 plot((t0+Tstep):Tstep:(tf-Tstep), XkkDyn(:,6), 'r');
 plot((t0+Tstep):Tstep:(tf-Tstep), XkkStat(:,6), 'y');
-plot(t0:Tstep:(tf-Tstep), X(6,:), 'g');
 hold off;
 xlabel("Time", 'FontSize', 12);
 ylabel("flow", 'FontSize', 12);
 title("$F_4$", 'FontSize', 15);
+ylim([min([min(XkkDyn(:,6)), min(XkkStat(:,6)), min(X(6,:))])-5, max([50, max(XkkDyn(:,6)), max(XkkStat(:,6)), max(X(6,:))+5])])
+
+Lgnd = legend("True mean of the disturbance", "Simulated disturbance", "Dynamic Kalman prediction", "Static Kalman prediction", 'FontSize', 11.5);
+Lgnd.Position(1) = 0.3;
+Lgnd.Position(2) = 0.15;
 saveas(fig, '../Exam project/Figures/kalman_disturbances.png')
 
 
@@ -208,70 +217,81 @@ T = t0:Tstep:tf;
 % Static Kalman filter
 [TkkStat, XkkStat, Xkp1k, YkkStat, Ykp1k, P, dkk] = KalmanFilterStatic(Ad, Bd, Cd, T, X(:, :)', Y', xs(:), ys, us, ds, Qd, G, eye(4), p);
 
-fig = figure('Position', [500 250 750 500]);
-subplot(2, 2, 3)
+fig = figure('Position', [500 250 850 700]);
+subplot(3, 2, 3)
 plot(t0:Tstep:(tf-Tstep), Y(1,:));
 hold on;
 plot(TkkDyn(1:end-1), YkkDyn(:, 1));
 plot(TkkStat(1:end-1), YkkStat(:, 1));
 hold off;
-xlabel("Time");
-ylabel("Height");
-title('Tank 1');
+xlabel("Time", 'FontSize', 13.5);
+ylabel("Height", 'FontSize', 13.5);
+title('Tank 1', 'FontSize', 15);
 
-subplot(2, 2, 4)
+subplot(3, 2, 4)
 plot(t0:Tstep:(tf-Tstep), Y(2,:));
 hold on;
 plot(TkkDyn(1:end-1), YkkDyn(:, 2));
 plot(TkkStat(1:end-1), YkkStat(:, 2));
 hold off;
-xlabel("Time");
-ylabel("Height");
-legend("Measured heights", "Dynamic Kalman prediction", "Static Kalman prediction", "Location", "SouthEast")
-title('Tank 2');
+xlabel("Time", 'FontSize', 13.5);
+ylabel("Height", 'FontSize', 13.5);
+title('Tank 2', 'FontSize', 15);
 
-subplot(2, 2, 1)
+subplot(3, 2, 1)
 plot(t0:Tstep:(tf-Tstep), Y(3,:));
 hold on;
 plot(TkkDyn(1:end-1), YkkDyn(:, 3));
 plot(TkkStat(1:end-1), YkkStat(:, 3));
 hold off;
-xlabel("Time");
-ylabel("Height");
-title('Tank 3');
+xlabel("Time", 'FontSize', 13.5);
+ylabel("Height", 'FontSize', 13.5);
+title('Tank 3', 'FontSize', 15);
 
-subplot(2, 2, 2)
+subplot(3, 2, 2)
 plot(t0:Tstep:(tf-Tstep), Y(4,:));
 hold on;
 plot(TkkDyn(1:end-1), YkkDyn(:, 4), 'r');
 plot(TkkStat(1:end-1), YkkStat(:, 4), 'y');
 hold off;
-xlabel("Time");
-ylabel("Height");
-title('Tank 4');
+xlabel("Time", 'FontSize', 13.5);
+ylabel("Height", 'FontSize', 13.5);
+title('Tank 4', 'FontSize', 15);
+
+Lgnd = legend("Measured heights", "Dynamic Kalman prediction", "Static Kalman prediction", 'FontSize', 13);
+Lgnd.Position(1) = 0.35;
+Lgnd.Position(2) = 0.2;
+
+
 saveas(fig, '../Exam project/Figures/nostep_kalman.png')
 
-fig = figure;
-subplot(2, 1, 1)
+fig = figure('Position', [500 250 550 550]);
+subplot(3, 1, 1)
 plot(t0:Tstep:(tf-Tstep), zeros(225, 1), '--b');
 hold on;
+plot(t0:Tstep:(tf-Tstep), X(5,:), 'g');
 plot((t0+Tstep):Tstep:(tf-Tstep), XkkDyn(:,5), 'r');
 plot((t0+Tstep):Tstep:(tf-Tstep), XkkStat(:,5), 'y');
-plot(t0:Tstep:(tf-Tstep), X(5,:), 'g');
 hold off;
 xlabel("Time", 'FontSize', 12);
 ylabel("flow", 'FontSize', 12);
 title("$F_3$", 'FontSize', 15);
+ylim([min([min(XkkDyn(:,5)), min(XkkStat(:,5)), min(X(5,:))])-2, max([0, max(XkkDyn(:,5)), max(XkkStat(:,5)), max(X(5,:))])+2])
 
-subplot(2, 1, 2)
+subplot(3, 1, 2)
 plot(t0:Tstep:(tf-Tstep), zeros(225, 1), '--b');
 hold on;
+plot(t0:Tstep:(tf-Tstep), X(6,:), 'g');
 plot((t0+Tstep):Tstep:(tf-Tstep), XkkDyn(:,6), 'r');
 plot((t0+Tstep):Tstep:(tf-Tstep), XkkStat(:,6), 'y');
-plot(t0:Tstep:(tf-Tstep), X(6,:), 'g');
 hold off;
 xlabel("Time", 'FontSize', 12);
 ylabel("flow", 'FontSize', 12);
 title("$F_4$", 'FontSize', 15);
+ylim([min([min(XkkDyn(:,6)), min(XkkStat(:,6)), min(X(6,:))])-2, max([max(XkkDyn(:,6)), max(XkkStat(:,6)), max(X(6,:))])+2])
+
+Lgnd = legend("True mean of the disturbance", "Simulated disturbance", "Dynamic Kalman prediction", "Static Kalman prediction", 'FontSize', 11.5);
+Lgnd.Position(1) = 0.3;
+Lgnd.Position(2) = 0.15;
 saveas(fig, '../Exam project/Figures/nostep_kalman_disturbances.png')
 
