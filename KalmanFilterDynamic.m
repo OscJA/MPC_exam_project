@@ -32,6 +32,7 @@ Ykp1k = zeros(N-1,4);
 Tkk = T(2:end);
 Pkk = cell(N-1,1);
 Pkp1k = cell(N-1,1);
+Qkk = Q;
 
 % --------------------------------------------------------------
 % Perform 1 iteration of dynamic Kalman filter and save in matrix
@@ -55,11 +56,11 @@ for i = 1:N-1
     % Make one-step prediction
     wkk = Kfwk * ek;
     pkk = pkkm1 - Kfxk*Rek*Kfxk';
-    Qkk = Q-Kfwk*Rek*Kfwk';
+    Qkk = Qkk-Kfwk*Rek*Kfwk';
     
     xkp1k = Ad*xkk + Bd*(us-us) + wkk;
     ykp1k = FourTankSystemSensor(xkp1k(1:4),p);
-    pkp1k = Ad*pkk*Ad' + Qkk - Ad*Kfxk*S' - S*Kfxk'*Ad';
+    pkp1k = Ad*pkk*Ad' + G*Q*G' - Ad*Kfxk*S' - S*Kfxk'*Ad';
     
     % Save into matrices
     dkk(i,:) = xkp1k(5:(5+nx_diff-1))'+ds';
@@ -75,7 +76,5 @@ for i = 1:N-1
     xkkm1 = xkp1k;
 
 end
-
-
 
 end

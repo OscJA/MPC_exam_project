@@ -1,4 +1,4 @@
-function U = softConstrainedOptimization(xk, wk, ukm1, ulb, uub, A_bar, Z_bar, Mdu, H_z, H_u, H_du, H_s, H_t, g_u, g_s, g_t, rho_u, Lambda, Gamma, I0, WI, dU_min, dU_max, Rmin, Rmax, gz_mat, rhoz_mat, Phi_x, Phi_w, N)
+function U = softConstrainedOptimization(xk, wk, ukm1, ulb, uub, A_bar, Z_bar, Mdu, H_z, H_u, H_du, H_s, H_t, g_u, g_s, g_t, rho_u, I0, WI, dU_min, dU_max, Rmin, Rmax, gz_mat, rhoz_mat, Phi_x, Phi_w, N)
 
 % Find b_k
 b_k = Phi_x*xk + Phi_w*wk;

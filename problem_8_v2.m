@@ -210,6 +210,11 @@ xkp1k = zeros(dim_x, 1);
 Rdd = 5*eye(2);
 Y(:, 1) = Cd*X(:, 1) + Rvv*randn(4,1);
 
+u_lb_vec = repmat([u_lb; u_lb]-us, N, 1)';
+u_ub_vec = repmat([u_ub; u_ub]-us, N, 1)';
+max_diff_u = 20;
+dU_min = repmat([-max_diff_u; -max_diff_u], N, 1);
+dU_max = repmat([max_diff_u; max_diff_u], N, 1);
 
 for i=1:(tf-t0)/Ts
 
@@ -222,7 +227,8 @@ for i=1:(tf-t0)/Ts
 
     [Xhat(:, i), xkp1k, wk] = OneStepKalmanFilterStatic(Ad, Bd, Cd, xkp1k, Y(:, i), U(:, i), Kfx, Kfw);
 
-    Utmp = unconstrainedOptimization(Xhat(:, i), wk, U(:, i), Z_bar, Mdu, H_z, H_u, H_du, g_u, rho_u, WI, gz_mat, rhoz_mat, Phi_x, Phi_w, N);
+    % Utmp = unconstrainedOptimization(Xhat(:, i), wk, U(:, i), Z_bar, Mdu, H_z, H_u, H_du, g_u, rho_u, WI, gz_mat, rhoz_mat, Phi_x, Phi_w, N);
+    Utmp = constrainedOptimization(Xhat(:, i), wk, U(:, i), u_lb_vec, u_ub_vec, Z_bar, Mdu, H_z, H_u, H_du, g_u, rho_u, WI, gz_mat, rhoz_mat, Phi_x, Phi_w, Lambda, dU_min, dU_max);
     U(:, i+1) = Utmp(1:dim_u);
 
 
@@ -257,7 +263,7 @@ ylabel('Flow [cm^3/s]');
 ylim([-20, 520])
 % legend('Actual', 'Target')
 title('F_2');
-saveas(fig, '../Exam project/Figures/unconstrained_flow.png')
+saveas(fig, '../Exam project/Figures/input_constrained_flow.png')
 
 
 fig = figure('Position', [400 100 900 400]);
@@ -278,7 +284,7 @@ hold off;
 xlabel('Time [s]');
 ylabel('Height [cm]');
 title('Tank 2');
-saveas(fig, '../Exam project/Figures/unconstrained_heights.png')
+saveas(fig, '../Exam project/Figures/input_constrained_heights.png')
 
 
 Yhat = Cd*Xhat;

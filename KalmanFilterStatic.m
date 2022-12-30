@@ -73,6 +73,4 @@ for i = 1:N-1
     xkkm1 = xkp1k;
 end
 
-
-
 end

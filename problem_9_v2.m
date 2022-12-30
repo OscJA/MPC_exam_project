@@ -195,6 +195,28 @@ Re = Cd*P*Cd' + Rvv;
 Kfx = P*Cd'*inv(Re);
 Kfw = S*inv(Re);
 
+%% Soft constraints variables
+A_bar = [
+    Lambda, zeros(N*dim_u, 2*N*dim_u);
+    Gamma, eye(N*dim_u), zeros(N*dim_u, N*dim_u);
+    Gamma, zeros(N*dim_u, N*dim_u), -eye(N*dim_u)
+    ];
+
+Ws1 = 10*eye(dim_z);
+Ws2 = 100*eye(dim_z);
+Wt1 = 10*eye(dim_z);
+Wt2 = 100*eye(dim_z);
+
+Ws2_bar = kron(eye(N), Ws2);
+Ws1_bar = kron(eye(N), Ws1);
+Wt2_bar = kron(eye(N), Wt2);
+Wt1_bar = kron(eye(N), Wt1);
+
+H_s = Ws2_bar'*Ws2_bar;
+H_t = Wt2_bar'*Wt2_bar;
+g_s = Ws1_bar*ones(dim_z*N, 1);
+g_t = Wt1_bar*ones(dim_z*N, 1);
+
 
 %% Simulate my optimization
 
@@ -210,6 +232,13 @@ xkp1k = zeros(dim_x, 1);
 Rdd = 5*eye(2);
 Y(:, 1) = Cd*X(:, 1) + Rvv*randn(4,1);
 
+u_lb_vec = repmat([u_lb; u_lb]-us, 3*N, 1)';
+u_ub_vec = [repmat([u_ub; u_ub]-us, N, 1); inf*ones(2*dim_z*N, 1)];
+max_diff_u = 20;
+max_diff_h =0.5;
+dU_min = repmat([-max_diff_u; -max_diff_u], N, 1);
+dU_max = repmat([max_diff_u; max_diff_u], N, 1);
+
 
 for i=1:(tf-t0)/Ts
 
@@ -222,7 +251,10 @@ for i=1:(tf-t0)/Ts
 
     [Xhat(:, i), xkp1k, wk] = OneStepKalmanFilterStatic(Ad, Bd, Cd, xkp1k, Y(:, i), U(:, i), Kfx, Kfw);
 
-    Utmp = unconstrainedOptimization(Xhat(:, i), wk, U(:, i), Z_bar, Mdu, H_z, H_u, H_du, g_u, rho_u, WI, gz_mat, rhoz_mat, Phi_x, Phi_w, N);
+    Rmin = Z_bar-max_diff_h;
+    Rmax = Z_bar+max_diff_h;
+    % Utmp = constrainedOptimization(Xhat(:, i), wk, U(:, i), u_lb_vec, u_ub_vec, Z_bar, Mdu, H_z, H_u, H_du, g_u, rho_u, WI, gz_mat, rhoz_mat, Phi_x, Phi_w, N);
+    Utmp = softConstrainedOptimization(Xhat(:, i), wk, U(:, i), u_lb_vec, u_ub_vec, A_bar, Z_bar, Mdu, H_z, H_u, H_du, H_s, H_t, g_u, g_s, g_t, rho_u, I0, WI, dU_min, dU_max, Rmin, Rmax, gz_mat, rhoz_mat, Phi_x, Phi_w, N);
     U(:, i+1) = Utmp(1:dim_u);
 
 
@@ -257,7 +289,7 @@ ylabel('Flow [cm^3/s]');
 ylim([-20, 520])
 % legend('Actual', 'Target')
 title('F_2');
-saveas(fig, '../Exam project/Figures/unconstrained_flow.png')
+saveas(fig, '../Exam project/Figures/soft_constrained_flow.png')
 
 
 fig = figure('Position', [400 100 900 400]);
@@ -278,7 +310,7 @@ hold off;
 xlabel('Time [s]');
 ylabel('Height [cm]');
 title('Tank 2');
-saveas(fig, '../Exam project/Figures/unconstrained_heights.png')
+saveas(fig, '../Exam project/Figures/soft_constrained_heights.png')
 
 
 Yhat = Cd*Xhat;

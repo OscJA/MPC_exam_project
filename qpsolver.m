@@ -17,7 +17,7 @@ beq = zeros(0, 1);
 % Ensure that H is symmetric
 H = (H+H')/2;
 
-[x, ~, ~, info] = quadprog(H, g', A, b, Aeq, beq, lb, ub, xinit);
+[x, ~, ~, info] = quadprog(H, g', A, b, Aeq, beq, lb, ub);
 
 
 end

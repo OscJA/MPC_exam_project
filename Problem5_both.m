@@ -111,7 +111,7 @@ T = t0:Tstep:tf;
 [TkkDyn, XkkDyn, Xkp1k, YkkDyn, Ykp1k, Pkk, Pkp1k, dkk] = KalmanFilterDynamic(Ad, Bd, Cd, T, X', Y', xs, ys, us, ds, Qd, G, Rvv, p);
 
 % Static Kalman filter
-[TkkStat, XkkStat, Xkp1k, YkkStat, Ykp1k, P, dkk] = KalmanFilterStatic(Ad, Bd, Cd, T, X(:, :)', Y', xs(:), ys, us, ds, Qd, G, eye(4), p);
+[TkkStat, XkkStat, Xkp1k, YkkStat, Ykp1k, P, dkk] = KalmanFilterStatic(Ad, Bd, Cd, T, X', Y', xs, ys, us, ds, Qd, G, Rvv, p);
 
 
 fig = figure('Position', [500 250 850 700]);
@@ -215,7 +215,7 @@ T = t0:Tstep:tf;
 [TkkDyn, XkkDyn, Xkp1k, YkkDyn, Ykp1k, Pkk, Pkp1k, dkk] = KalmanFilterDynamic(Ad, Bd, Cd, T, X', Y', xs, ys, us, ds, Qd, G, Rvv, p);
 
 % Static Kalman filter
-[TkkStat, XkkStat, Xkp1k, YkkStat, Ykp1k, P, dkk] = KalmanFilterStatic(Ad, Bd, Cd, T, X(:, :)', Y', xs(:), ys, us, ds, Qd, G, eye(4), p);
+[TkkStat, XkkStat, Xkp1k, YkkStat, Ykp1k, P, dkk] = KalmanFilterStatic(Ad, Bd, Cd, T, X(:, :)', Y', xs(:), ys, us, ds, Qd, G, Rvv, p);
 
 fig = figure('Position', [500 250 850 700]);
 subplot(3, 2, 3)
