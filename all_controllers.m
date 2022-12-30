@@ -405,11 +405,11 @@ Xhat = zeros(dim_x, N_sim);
 wk = zeros(dim_w, 1);
 xkp1k = zeros(dim_x, 1);
 
+min_h = [20; 30];
+max_h = [55; 77];
 
-% Rmin = 10*ones(2,dim_z*N);
-% Rmax = 10*ones(2,dim_z*N);
-% 
-% Rmin(1,:) = 10*Rmin(1,:);
+Rmin = repmat(min_h-ys(1:2), [N, 1]);
+Rmax = repmat(max_h-ys(1:2), [N, 1]);
 
 for i=1:N_sim
 
@@ -422,8 +422,6 @@ for i=1:N_sim
 
     [Xhat(:, i), xkp1k, wk] = OneStepKalmanFilterStatic(Ad, Bd, Cd, xkp1k, Y(:, i), U(:, i), Kfx, Kfw);
 
-    Rmin = Z_bar-max_diff_h;
-    Rmax = Z_bar+max_diff_h;
     % Utmp = constrainedOptimization(Xhat(:, i), wk, U(:, i), u_lb_vec, u_ub_vec, Z_bar, Mdu, H_z, H_u, H_du, g_u, rho_u, WI, gz_mat, rhoz_mat, Phi_x, Phi_w, N);
     Utmp = softConstrainedOptimization(Xhat(:, i), wk, U(:, i), u_lb_vec, u_ub_vec, A_bar, Z_bar, Mdu, H_z, H_u, H_du, H_s, H_t, g_u, g_s, g_t, rho_u, I0, WI, dU_min, dU_max, Rmin, Rmax, gz_mat, rhoz_mat, Phi_x, Phi_w, N);
     U(:, i+1) = Utmp(1:dim_u);
@@ -523,6 +521,8 @@ fig = figure('Position', [400 100 900 400]);
 subplot(1, 2, 1)
 hold on;
 plot(t0:Ts:tf, Z_bars(1, 1:(tf-t0)/Ts+1)+ys(1), '--black');
+plot([t0, tf], [max_h(1), max_h(1)], 'Linestyle', '--', 'Color', '#77AC30');
+plot([t0, tf], [min_h(1), min_h(1)], 'Linestyle', '--', 'Color', '#77AC30');
 plot(t0:Ts:tf, hu1, '-b');
 plot(t0:Ts:tf, hi1, '--g');
 plot(t0:Ts:tf, hs1, '-r');
@@ -534,6 +534,8 @@ title('Tank 1');
 subplot(1, 2, 2)
 hold on;
 plot(t0:Ts:tf, Z_bars(2, 1:(tf-t0)/Ts+1)+ys(2), '--black');
+plot([t0, tf], [max_h(2), max_h(2)], 'Linestyle', '--', 'Color', '#77AC30');
+plot([t0, tf], [min_h(2), min_h(2)], 'Linestyle', '--', 'Color', '#77AC30');
 plot(t0:Ts:tf, hu2, '-b');
 plot(t0:Ts:tf, hi2, '--g');
 plot(t0:Ts:tf, hs2, '-r');
@@ -541,7 +543,7 @@ hold off;
 xlabel('Time [s]');
 ylabel('Height [cm]');
 title('Tank 2');
-legend("", "Unconstrained", "Input constrained", "Soft constrained", "Location", [0.45,0.18,0.15,0.1]);
+legend("", "", "", "Unconstrained", "Input constrained", "Soft constrained", "Location", [0.45,0.18,0.15,0.1]);
 
 saveas(fig, '../Exam project/Figures/all_heights.png')
 
