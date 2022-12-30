@@ -1,7 +1,12 @@
 function U = unconstrainedOptimization(xk, wk, ukm1, Z_bar, Mdu, H_z, H_u, H_du, g_u, rho_u, WI, gz_mat, rhoz_mat, Phi_x, Phi_w, N)
+%% 
+% Choose an optimal flow to minimize the unconstrained optimization problem
+% Author: Oscar Juul Andersen, s194316
+%%
 
 % Find b_k
 b_k = Phi_x*xk + Phi_w*wk;
+
 %% phi_z parameters
 c_k = Z_bar - b_k;
 g_z = gz_mat*c_k;

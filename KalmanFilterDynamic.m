@@ -1,28 +1,15 @@
 function [Tkk, Xkk, Xkp1k, Ykk, Ykp1k, Pkk, Pkp1k, dkk] = KalmanFilterDynamic(Ad, Bd, Cd, T, X, Y, xs, ys, us, ds, Q, G, R, p)
+%% 
+% Use the dynamic Kalman filter to predict the states of the system for a
+% number of iterations
+% Author: Oscar Juul Andersen, s194316
+%%
 
-% --------------------------------------------------------------
-% Setup random values
-% --------------------------------------------------------------
-nx = size(Ad,1); %4;
-nx_diff = nx-4;
-if nx_diff > 2
-    ds = [zeros(nx_diff-2,1); ds];
-end
-%nu = 2;
-% G = eye(nx);
-% Qz = eye(nu); %diag([1,1]);
+%% Setup matrices
+nx = size(Ad,1);
+
 S = zeros(nx,4);
-%Rvv = eye(nx);
-% Q = eye(nx);
-%Rwv = zeros(nx);
-% Wz = eye(nu);
-% Wu = eye(nu);
-% Wdu = zeros(nu); %eye(nu);
-% R = eye(4);
 
-% --------------------------------------------------------------
-% Setup matices
-% --------------------------------------------------------------
 N = size(X,1);
 Xkk = zeros(N-1,6);
 Xkp1k = zeros(N-1,6);
@@ -34,9 +21,8 @@ Pkk = cell(N-1,1);
 Pkp1k = cell(N-1,1);
 Qkk = Q;
 
-% --------------------------------------------------------------
-% Perform 1 iteration of dynamic Kalman filter and save in matrix
-% --------------------------------------------------------------
+
+%% Do the Kalman filtering
 xkkm1 = X(1,:)'-xs;
 pkkm1 = eye(nx);
 

@@ -28,7 +28,7 @@ p = [p; xs; ys; us; ds];
 At = [A1; A2; A3; A4];
 ap = [a1; a2; a3; a4];
 gam = [gamma1; gamma2];
-Tstep = 4; % Time step (I think)
+Tstep = 4; % Time step
 t0 = 0;
 tf = 15*60;
 
@@ -57,45 +57,32 @@ RES = expm([-A, Sigma*Sigma'; zeros(size(A)), A']*Tstep);
 Qd = Ad*RES(1:6, 7:end);
 
 
-%% Create Wiener process noise
+
+%% Define the matrices and vectors needed in the simulation
 Nsim = (tf-t0)/Tstep;
-dt = Tstep/Nsim; % Nsim euler-maruyama in simulation (and euler steps in CDEKF)
-dW = sqrt(dt) * randn(2, Tstep/dt);
-
-%% Simulation
-
 Delta_d = zeros(2, Nsim);
 Delta_d(:, 50) = [50, 50];
-
 Rvv = 0.15*eye(4);
 Rdd = 0.4*eye(4);
-
-% G = eye(4);
-% G(1,1) = 0;
-% G(2,2) = 0;
 G = eye(6);
 
-
+% Initiate matrices
 X = zeros(6, Nsim);
 Y = zeros(4, Nsim);
-
 U = ones(2, Nsim);
 U(:, 1:50) = 300*U(:, 1:50);
 U(:, 51:end) = 300*U(:, 51:end);
 
 xs = [xs; zeros(2,1)]; % Include the noise variables in xs
 X(:, 1) = zeros(6,1);
-% X(:, 1) = xs;
-% xdot = A*(xs-xs) + B*(U(:,1)-us) + Sigma*dW(:, 1);
-% X(:, 2) = X(:, 1) + Tstep*xdot;
-% Y(:, 1) = Cd*X(:, 1);
 Qd_chol = chol(Qd);
+
+
+%% Start the simulation
 
 for i=1:Nsim-1
     w = Qd_chol*randn(6, 1);
     X(:, i+1) = Ad*X(:, i) + Bd*(U(:, i)-us) + eye(6)*w;
-    % xdot = Ad*(X(:, i)-xs) + Bd*(U(:, i)-us) + Sigma*dW(:, i);
-    % X(:, i+1) = X(:, i) + Tstep*xdot;
     X(5:6, i+1) = X(5:6, i+1) + Delta_d(:, i);
     Y(:, i) = Cd*X(:, i) + Rvv*randn(4,1);
 end
@@ -106,7 +93,7 @@ X = X + xs;
 T = t0:Tstep:tf;
 
 
-%% STEP CHANGE
+%% Do the Kalman filtering
 % Dynamic Kalman filter
 [TkkDyn, XkkDyn, Xkp1k, YkkDyn, Ykp1k, Pkk, Pkp1k, dkk] = KalmanFilterDynamic(Ad, Bd, Cd, T, X', Y', xs, ys, us, ds, Qd, G, Rvv, p);
 
@@ -114,6 +101,7 @@ T = t0:Tstep:tf;
 [TkkStat, XkkStat, Xkp1k, YkkStat, Ykp1k, P, dkk] = KalmanFilterStatic(Ad, Bd, Cd, T, X', Y', xs, ys, us, ds, Qd, G, Rvv, p);
 
 
+%% Plot the Kalman estimated heights together with the simulated heights
 fig = figure('Position', [500 250 850 700]);
 subplot(3, 2, 3)
 plot(t0:Tstep:(tf-Tstep), Y(1,:));
@@ -158,9 +146,10 @@ title('Tank 4', 'FontSize', 15);
 Lgnd = legend("Measured heights", "Dynamic Kalman prediction", "Static Kalman prediction", 'FontSize', 13);
 Lgnd.Position(1) = 0.35;
 Lgnd.Position(2) = 0.2;
-
 saveas(fig, '../Exam project/Figures/kalman.png')
 
+
+%% Plot the Kalman estimated disturbances together with the simulated disturbances
 fig = figure('Position', [500 250 550 550]);
 subplot(3, 1, 1)
 plot(t0:Tstep:(tf-Tstep), cumsum(Delta_d(1, :)), '--b');
@@ -193,12 +182,8 @@ saveas(fig, '../Exam project/Figures/kalman_disturbances.png')
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% No step change
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% Do the simulation again, without a step change in the noise
 X(:, 1) = zeros(6,1);
 for i=1:Nsim-1
     w = Qd_chol*randn(6, 1);
@@ -211,12 +196,14 @@ X = X + xs;
 
 T = t0:Tstep:tf;
 
+%% Do the Kalman filtering
 % Dynamic Kalman filter
 [TkkDyn, XkkDyn, Xkp1k, YkkDyn, Ykp1k, Pkk, Pkp1k, dkk] = KalmanFilterDynamic(Ad, Bd, Cd, T, X', Y', xs, ys, us, ds, Qd, G, Rvv, p);
 
 % Static Kalman filter
 [TkkStat, XkkStat, Xkp1k, YkkStat, Ykp1k, P, dkk] = KalmanFilterStatic(Ad, Bd, Cd, T, X(:, :)', Y', xs(:), ys, us, ds, Qd, G, Rvv, p);
 
+%% Plot the Kalman estimated heights together with the simulated heights
 fig = figure('Position', [500 250 850 700]);
 subplot(3, 2, 3)
 plot(t0:Tstep:(tf-Tstep), Y(1,:));
@@ -262,9 +249,10 @@ Lgnd = legend("Measured heights", "Dynamic Kalman prediction", "Static Kalman pr
 Lgnd.Position(1) = 0.35;
 Lgnd.Position(2) = 0.2;
 
-
 saveas(fig, '../Exam project/Figures/nostep_kalman.png')
 
+
+%% Plot the Kalman estimated disturbances together with the simulated disturbances
 fig = figure('Position', [500 250 550 550]);
 subplot(3, 1, 1)
 plot(t0:Tstep:(tf-Tstep), zeros(225, 1), '--b');

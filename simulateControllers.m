@@ -58,7 +58,7 @@ RES = expm([-A, Sigma*Sigma'; zeros(size(A)), A']*Tstep);
 Qd = Ad*RES(1:6, 7:end);
 Qd_chol = chol(Qd);
 
-%% Markov parameters
+%% Calculate matrices which we need to use in the simulation and controllers
 N = 25;
 dim_z = 2;
 dim_u = 2;
@@ -70,7 +70,6 @@ Cz = Cd(1:2, :);
 G = eye(dim_x);
 
 H = zeros(dim_z, dim_u, N);
-% H(:, :, 1) = Ed;
 Obs_matrix = zeros(dim_z, dim_x, N+1);
 Obs_matrix(:, :, 1) = Cz;
 
@@ -94,54 +93,64 @@ for i=1:N-1
     Lambda(1+i*dim_u:(i+1)*dim_u, 1+(i-1)*dim_u:i*dim_u) = -eye(dim_u);
 end
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Unconstrained optimization
-% First define the target values 
-R = 40*ones(2, (tf-t0)/Ts);
-
-u_ub = 500;
-u_lb = 0;
-
-% I currently set all W to just be identity matrices
-Wz = 10*eye(dim_z); 
-Wu = 0.1*eye(dim_u);
-Wdu = 10*eye(dim_u);
-
 Phi_x = zeros(N*dim_z, dim_x);
 for i=1:N
     Phi_x(1+(i-1)*dim_z:i*dim_z, :) = Obs_matrix(:, :, i+1);
 end
-% Phi_x = reshape(Obs_matrix(:, :, 2:end), N*dim_z, dim_x);
 Phi_w = reshape(Phi_w, dim_w, N*dim_z)';
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Set up weights and limits of the problem
+% Minimum and maximum flows
+u_ub = 500;
+u_lb = 0;
+
+u_lb_vec = repmat([u_lb; u_lb]-us, 3*N, 1)';
+u_ub_vec = [repmat([u_ub; u_ub]-us, N, 1); inf*ones(2*dim_z*N, 1)];
+max_diff_u = 20;
+dU_min = repmat([-max_diff_u; -max_diff_u], N, 1);
+dU_max = repmat([max_diff_u; max_diff_u], N, 1);
+
+% Weight matrices
+Wz = 10*eye(dim_z); 
+Wu = 0.1*eye(dim_u);
+Wdu = 10*eye(dim_u);
+
+w1 = 25;
+w2 = 25;
+Ws1 = w1*eye(dim_z);
+Ws2 = w2*eye(dim_z);
+Wt1 = w1*eye(dim_z);
+Wt2 = w2*eye(dim_z);
+
 
 %% Calculate matrices used in the optimizer
 % Here I calculate all parameters which are constant, to save computing
 % power
 
 % First, define some necessary conditions for the problem
-% U_bars = [250*ones(1, (tf-t0)/Ts); 200*ones(1, (tf-t0)/Ts)]-us;
 U_bars = zeros(2,N);
 U_bar = reshape(U_bars(:, 1:N), [], 1);
 
 % Target heights
-% Z_bars = [35*ones(1, 70), 40*ones(1,160); 49*ones(1,230)]-ys(1:2);
 N_sim = (tf-t0)/Ts;
 Z_bars = ones(2, N_sim+N+3*N_sim);
 
+%% Determine the setpoints
 % Timestep of the first jump
 J1 = 150;
 J2 = 350;
 J3 = 550;
 J4 = 750;
-% J5 = 800;
 
 % Hij is the wanted height of container j at jump i
 H11 = 45;
 H12 = 60;
 H21 = 28;
 H22 = 35;
-H31 = 55; % 42
-H32 = 77; % 55
+H31 = 55;
+H32 = 77;
 H41 = 48;
 H42 = 48;
 
@@ -161,7 +170,7 @@ Z_bars(1, :) = Z_bars(1, :) - ys(1);
 Z_bars(2, :) = Z_bars(2, :) - ys(2);
 
 
-
+%% Calculate optimization parameters
 % phi_z parameters
 Wz_bar = kron(eye(N), Wz);
 H_z = (Wz_bar*Gamma)'*(Wz_bar*Gamma);
@@ -191,19 +200,14 @@ Re = Cd*P*Cd' + Rvv;
 Kfx = P*Cd'*inv(Re);
 Kfw = S*inv(Re);
 
-%% Soft constraints variables
+
+%% Define soft constraint variables
 A_bar = [
     Lambda, zeros(N*dim_u, 2*N*dim_u);
     Gamma, eye(N*dim_u), zeros(N*dim_u, N*dim_u);
     Gamma, zeros(N*dim_u, N*dim_u), -eye(N*dim_u)
     ];
-w1 = 25;
-w2 = 25;
 
-Ws1 = w1*eye(dim_z);
-Ws2 = w2*eye(dim_z);
-Wt1 = w1*eye(dim_z);
-Wt2 = w2*eye(dim_z);
 
 Ws2_bar = kron(eye(N), Ws2);
 Ws1_bar = kron(eye(N), Ws1);
@@ -215,32 +219,23 @@ H_t = Wt2_bar'*Wt2_bar;
 g_s = Ws1_bar*ones(dim_z*N, 1);
 g_t = Wt1_bar*ones(dim_z*N, 1);
 
+%% Caluate noise realizations
+W = Qd_chol*randn(6, N_sim);
+V = Rvv*randn(4, N_sim);
 
-%% Simulate my optimization
-
-% Initiate matrices
+%% Initiate matrices
 U = zeros(dim_u, N_sim);
 X = zeros(dim_x, N_sim);
 Y = zeros(dim_y, N_sim);
 Xhat = zeros(dim_x, N_sim);
 
-wk = zeros(dim_w, 1);
 xkp1k = zeros(dim_x, 1);
 
-Rdd = 5*eye(2);
 Y(:, 1) = Cd*X(:, 1) + Rvv*randn(4,1);
 
-u_lb_vec = repmat([u_lb; u_lb]-us, 3*N, 1)';
-u_ub_vec = [repmat([u_ub; u_ub]-us, N, 1); inf*ones(2*dim_z*N, 1)];
-max_diff_u = 20;
-dU_min = repmat([-max_diff_u; -max_diff_u], N, 1);
-dU_max = repmat([max_diff_u; max_diff_u], N, 1);
-
-% Caluate noise realizations
-W = Qd_chol*randn(6, N_sim);
-V = Rvv*randn(4, N_sim);
 
 %% UNCSONTRAINED OPTIMIZATION
+
 for i=1:(tf-t0)/Ts
 
     Z_bar = Z_bars(:, i:i+N-1);
@@ -262,18 +257,16 @@ Uu2 = U(2, :)+us(2);
 hu1 = Y(1, :)+ys(1);
 hu2 = Y(2, :)+ys(2);
 
+%% Plot the controlled flow and heights
 fig = figure('Position', [400 100 900 400]);
 subplot(1, 2, 1);
 plot(t0:Ts:tf, U(1, :)+us(1), '-b');
 hold on;
-% plot(t0:Ts:(tf_-Ts), U_bars(1, :)+us(1), '--r');
 plot([t0, tf], [u_ub, u_ub], '--r');
 plot([t0, tf], [u_lb, u_lb], '--r');
 hold off;
 xlabel('Time [s]');
 ylabel('Flow [cm^3/s]');
-%legend('Actual', 'Target')
-% ylim([min(U(1, :)+us(1))-20, max(U(1, :)+us(1))+20])
 ylim([-20, 520])
 title('F_1');
 
@@ -282,13 +275,10 @@ plot(t0:Ts:tf, U(2, :)+us(2), '-b');
 hold on;
 plot([t0, tf], [u_ub, u_ub], '--r');
 plot([t0, tf], [u_lb, u_lb], '--r');
-% plot(t0:Ts:(tf_-Ts), U_bars(2, :)+us(2), '--r');
 hold off;
 xlabel('Time [s]');
 ylabel('Flow [cm^3/s]');
-% ylim([min(U(2, :)+us(2))-20, max(U(2, :)+us(2))+20])
 ylim([-20, 520])
-% legend('Actual', 'Target')
 title('F_2');
 saveas(fig, '../Exam project/Figures/unconstrained_flow.png')
 
@@ -320,9 +310,7 @@ U = zeros(dim_u, N_sim);
 X = zeros(dim_x, N_sim);
 Y = zeros(dim_y, N_sim);
 Xhat = zeros(dim_x, N_sim);
-wk = zeros(dim_w, 1);
 xkp1k = zeros(dim_x, 1);
-
 
 for i=1:(tf-t0)/Ts
 
@@ -345,18 +333,16 @@ Ui2 = U(2, :)+us(2);
 hi1 = Y(1, :)+ys(1);
 hi2 = Y(2, :)+ys(2);
 
+%% Plot the controlled flow and heights
 fig = figure('Position', [400 100 900 400]);
 subplot(1, 2, 1);
 plot(t0:Ts:tf, U(1, :)+us(1), '-b');
 hold on;
-% plot(t0:Ts:(tf_-Ts), U_bars(1, :)+us(1), '--r');
 plot([t0, tf], [u_ub, u_ub], '--r');
 plot([t0, tf], [u_lb, u_lb], '--r');
 hold off;
 xlabel('Time [s]');
 ylabel('Flow [cm^3/s]');
-%legend('Actual', 'Target')
-% ylim([min(U(1, :)+us(1))-20, max(U(1, :)+us(1))+20])
 ylim([-20, 520])
 title('F_1');
 
@@ -365,13 +351,10 @@ plot(t0:Ts:tf, U(2, :)+us(2), '-b');
 hold on;
 plot([t0, tf], [u_ub, u_ub], '--r');
 plot([t0, tf], [u_lb, u_lb], '--r');
-% plot(t0:Ts:(tf_-Ts), U_bars(2, :)+us(2), '--r');
 hold off;
 xlabel('Time [s]');
 ylabel('Flow [cm^3/s]');
-% ylim([min(U(2, :)+us(2))-20, max(U(2, :)+us(2))+20])
 ylim([-20, 520])
-% legend('Actual', 'Target')
 title('F_2');
 saveas(fig, '../Exam project/Figures/input_constrained_flow.png')
 
@@ -402,9 +385,9 @@ U = zeros(dim_u, N_sim);
 X = zeros(dim_x, N_sim);
 Y = zeros(dim_y, N_sim);
 Xhat = zeros(dim_x, N_sim);
-wk = zeros(dim_w, 1);
 xkp1k = zeros(dim_x, 1);
 
+% Soft constraint max and min heights
 min_h = [20; 30];
 max_h = [55; 77];
 
@@ -422,7 +405,6 @@ for i=1:N_sim
 
     [Xhat(:, i), xkp1k, wk] = OneStepKalmanFilterStatic(Ad, Bd, Cd, xkp1k, Y(:, i), U(:, i), Kfx, Kfw);
 
-    % Utmp = constrainedOptimization(Xhat(:, i), wk, U(:, i), u_lb_vec, u_ub_vec, Z_bar, Mdu, H_z, H_u, H_du, g_u, rho_u, WI, gz_mat, rhoz_mat, Phi_x, Phi_w, N);
     Utmp = softConstrainedOptimization(Xhat(:, i), wk, U(:, i), u_lb_vec, u_ub_vec, A_bar, Z_bar, Mdu, H_z, H_u, H_du, H_s, H_t, g_u, g_s, g_t, rho_u, I0, WI, dU_min, dU_max, Rmin, Rmax, gz_mat, rhoz_mat, Phi_x, Phi_w, N);
     U(:, i+1) = Utmp(1:dim_u);
 
@@ -434,18 +416,18 @@ Us2 = U(2, :)+us(2);
 hs1 = Y(1, :)+ys(1);
 hs2 = Y(2, :)+ys(2);
 
+
+%% Plot the controlled flow and heights
+
 fig = figure('Position', [400 100 900 400]);
 subplot(1, 2, 1);
 plot(t0:Ts:tf, U(1, :)+us(1), '-b');
 hold on;
-% plot(t0:Ts:(tf_-Ts), U_bars(1, :)+us(1), '--r');
 plot([t0, tf], [u_ub, u_ub], '--r');
 plot([t0, tf], [u_lb, u_lb], '--r');
 hold off;
 xlabel('Time [s]');
 ylabel('Flow [cm^3/s]');
-%legend('Actual', 'Target')
-% ylim([min(U(1, :)+us(1))-20, max(U(1, :)+us(1))+20])
 ylim([-20, 520])
 title('F_1');
 
@@ -454,13 +436,10 @@ plot(t0:Ts:tf, U(2, :)+us(2), '-b');
 hold on;
 plot([t0, tf], [u_ub, u_ub], '--r');
 plot([t0, tf], [u_lb, u_lb], '--r');
-% plot(t0:Ts:(tf_-Ts), U_bars(2, :)+us(2), '--r');
 hold off;
 xlabel('Time [s]');
 ylabel('Flow [cm^3/s]');
-% ylim([min(U(2, :)+us(2))-20, max(U(2, :)+us(2))+20])
 ylim([-20, 520])
-% legend('Actual', 'Target')
 title('F_2');
 saveas(fig, '../Exam project/Figures/soft_constrained_flow.png')
 
@@ -580,13 +559,12 @@ hp1 = Y(1, :)+ys(1);
 hp2 = Y(2, :)+ys(2);
 
 
-% PI-Controller
+%% PI-Controller
 % Reset matrices and vectors before next simulation
 U = zeros(dim_u, N_sim);
 X = zeros(dim_x, N_sim);
 Y = zeros(dim_y, N_sim);
 I = 0;
-
 
 for i=1:N_sim
     w = Qd_chol*randn(6, 1);
@@ -606,7 +584,7 @@ hpi1 = Y(1, :)+ys(1);
 hpi2 = Y(2, :)+ys(2);
 
 
-% PID-Controller
+%% PID-Controller
 % Reset matrices and vectors before next simulation
 U = zeros(dim_u, N_sim);
 X = zeros(dim_x, N_sim);
@@ -631,8 +609,7 @@ Upid2 = U(2, :);
 hpid1 = Y(1, :)+ys(1);
 hpid2 = Y(2, :)+ys(2);
 
-% PID PLOTS
-
+%% PID PLOTS
 fig = figure('Position', [400 100 900 400]);
 subplot(1, 2, 1);
 hold on;
@@ -686,5 +663,4 @@ xlabel('Time [s]');
 ylabel('Height [cm]');
 title('Tank 2');
 legend("", "P", "PI", "PID", "Location", [0.44,0.18,0.15,0.1]);
-% legend("", "Unconstrained", "Input constrained", "Soft constrained", "Location", [0.45,0.18,0.15,0.1]);
 saveas(fig, '../Exam project/Figures/PID_all_heights.png')

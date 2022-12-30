@@ -1,4 +1,9 @@
 function U = softConstrainedOptimization(xk, wk, ukm1, ulb, uub, A_bar, Z_bar, Mdu, H_z, H_u, H_du, H_s, H_t, g_u, g_s, g_t, rho_u, I0, WI, dU_min, dU_max, Rmin, Rmax, gz_mat, rhoz_mat, Phi_x, Phi_w, N)
+%% 
+% Choose an optimal flow to minimize the soft-constrained optimization
+% problem
+% Author: Oscar Juul Andersen, s194316
+%%
 
 % Find b_k
 b_k = Phi_x*xk + Phi_w*wk;

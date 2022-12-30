@@ -1,4 +1,10 @@
 function U = economicOptimization(xk, wk, ukm1, R, gu, gv, Phi_x, Phi_w, ulb, uub, Lambda, Gamma, I0, dU_min, dU_max, N)
+%% 
+% Choose an optimal flow to minimize the economic linear program
+% problem
+% Author: Oscar Juul Andersen, s194316
+%%
+
 nu = length(ukm1);
 
 % Find b_k

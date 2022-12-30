@@ -1,5 +1,11 @@
-function [r_min, den_opt, num_min, s_opt, ts_opt] = find_transfer_params(H, Ts)
+function [r_min, den_opt, num_min, s_opt, ts_opt] = findTransferParameters(H, Ts)
+%% 
+% From the heights and timestep, find the best fitting transfer function
+% parameters by using Brute force
+% Author: Oscar Juul Andersen, s194316
+%%
 
+% Initiate variables
 r_min = inf;
 den_opt = [0,0,0];
 num_min = 0;
@@ -16,6 +22,7 @@ numUB = max(H);
 numDEL = (numUB-numLB)/10;
 
 for LLL=1:10
+    % This minimizes the area in which we search for parameters
     if LLL~=1
         a1LB = den_opt(2)-a1DEL;
         a1UB = den_opt(2)+a1DEL;
@@ -29,6 +36,8 @@ for LLL=1:10
         numUB = num_min+numDEL/2;
         numDEL = numDEL/10;
     end
+    % Try all combinations of parameters in the interval, and keep the
+    % combination with the lowest 2-norm of r
     for num = numLB:numDEL:numUB
         for alpha1=a1LB:a1DEL:a1UB
             for alpha2=a2LB:a2DEL:a2UB
@@ -45,7 +54,6 @@ for LLL=1:10
             end
         end
     end
-    disp(LLL);
 end
 
 

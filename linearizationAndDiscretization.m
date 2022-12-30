@@ -28,75 +28,27 @@ p = [p; xs; ys; us; d];
 At = [A1; A2; A3; A4];
 ap = [a1; a2; a3; a4];
 gam = [gamma1; gamma2];
-dt = 4; % Time step (I think)
+dt = 4; % Time step
 
 %% Linearization
 hs = ys;
 T = sqrt(2*At.*xs)./(ap.*sqrt(rho*g));
-% T = (At./ap).*sqrt(hs*4/(2*g));
 A = [-1/T(1) 0 1/T(3) 0;0 -1/T(2) 0 1/T(4);0 0 -1/T(3) 0;0 0 0 -1/T(4)];
 B = [rho*gam(1) 0;0 rho*gam(2); 0 rho*(1-gam(2)); rho*(1-gam(1)) 0];
-C = diag(1./(rho*At));
-Cz = C(1:2,:);
-
-M = expm([A, B; zeros(2,6)]*dt);
-Ad = M(1:4, 1:4);
-Bd = M(1:4, 5:6);
-
-%% Print the poles and gains
-
-param_names = ["K"; "\\tau_1"; "\\tau_2"];
-trans_fun = ["G_{11}"; "G_{12}"; "G_{21}"; "G_{22}"];
-K = num2str([gamma1/A1; (1-gamma2)/(A2*T(3)); (1-gamma1)/(A2*T(4)); gamma2/A2]);
-tau_1s = num2str([-1/T(1); -1/T(3); -1/T(4); -1/T(2)]);
-tau_2s = [""; -1/T(1); -1/T(2); ""];
-
-% T = table(trans_fun,K,tau_1s,tau_2s);
-% table2latex(T, '../Exam project/Tables/T.tex'); % params_sim.tex
-% Ttex = table2latex(T, []); % params_sim.tex
-precision = 4;
-
-% Mat = [
-%     string(round(gamma1/A1, precision)),...
-%     string(round((1-gamma2)/(A2*T(3)), precision)),...
-%     string(round((1-gamma1)/(A2*T(4)), precision)),...
-%     string(round(gamma2/A2, precision));
-%     string(round(-1/T(1), precision)),...
-%     string(round(-1/T(3), precision)),...
-%     string(round(-1/T(4), precision)),...
-%     string(round(-1/T(2), precision));
-%     "", ...
-%     string(round(-1/T(1), precision)),...
-%     string(round(-1/T(2), precision)),...
-%     ""];
-
-Mat = [
-    string(gamma1/A1),...
-    string((1-gamma2)/(A2*T(3))),...
-    string((1-gamma1)/(A2*T(4))),...
-    string(gamma2/A2);
-    string(-1/T(1)),...
-    string(-1/T(3)),...
-    string(-1/T(4)),...
-    string(-1/T(2));
-    "", ...
-    string(-1/T(1)),...
-    string(-1/T(2)),...
-    ""];
-
-T2L(param_names, trans_fun, Mat, '../Exam project/Tables/params_anal.tex');
-
-%% Discretize
-M = expm([A, B; zeros(2,6)]*dt);
-Ad1 = M(1:4, 1:4);
-Bd1 = M(1:4, 5:6);
-
 E = [
     0, 0;
     0, 0;
     rho, 0;
     0, rho
     ];
+C = diag(1./(rho*At));
+Cz = C(1:2,:);
+
+
+%% Discretize
+M = expm([A, B; zeros(2,6)]*dt);
+Ad1 = M(1:4, 1:4);
+Bd1 = M(1:4, 5:6);
 
 M = expm([A, B, E; zeros(4,8)]*dt);
 Ad = M(1:4, 1:4);
@@ -104,11 +56,11 @@ Bd = M(1:4, 5:6);
 Ed = M(1:4, 7:8);
 Cd = C;
 
+
 %% Markov parameters
 N = 250;
 H = zeros(4, 2, N+1);
 H(:, :, 1) = zeros(4, 2);
-% Obs_matrix = zeros(4, 2, N+1);
 Obs_matrix = Cd;
 for i=1:N
     Obs_matrix = Obs_matrix*Ad;
@@ -116,7 +68,6 @@ for i=1:N
 end
 Dd = zeros(4, 2);
 H = mimodss2dimpulse(Ad,Bd,Cd,Dd,N);
-
 
 fig = figure;
 plot(reshape(H(1,1,:), 1, []), 'LineWidth', 2)

@@ -1,4 +1,4 @@
-function [T, H] = stepResponseSimulation(step,flowNo,systemFun,t0,tf,xs,u,d,p)
+function [T, H] = stepResponseSimulationStochastic(step,flowNo,T,t0,tf,xs,u,p,Rvv,Qd_chol,Ad,Bd,Cd)
 %% 
 % From the heights and timestep, find the best fitting transfer function
 % parameters by using Brute force
@@ -12,7 +12,7 @@ stepSize = u(flowNo)*(step-1);
 u(flowNo) = u(flowNo)*step;
 
 % Simulate using the systemFun in the interval [t0, tf]
-[T, H] = nonlinearSimulation(systemFun,t0,tf,xs,u,d,p);
+[T, H] = stochasticSimulation(xs,t0,tf,T,u,p,Rvv,Qd_chol,Ad,Bd,Cd);
 
 % Calculate the normalized step change
 H = H./stepSize;

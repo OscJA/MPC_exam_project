@@ -1,6 +1,9 @@
 function [x,info] = qpsolver(H,g,l,u,A,bl,bu,xinit)
-% A interface which coonverts a certain input, into input accepted by the
+%% 
+% An interface which coonverts a certain input, into input accepted by the
 % quadprog solver
+% Author: Oscar Juul Andersen, s194316
+%%
 
 %%
 n = length(xinit);

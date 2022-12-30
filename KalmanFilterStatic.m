@@ -1,52 +1,33 @@
 function [Tkk, Xkk, Xkp1k, Ykk, Ykp1k, P, dkk] = KalmanFilterStatic(Ad, Bd, Cd, T, X, Y, xs, ys, us, ds, Qd, G, R, p)
+%% 
+% Use the static Kalman filter to predict the states of the system for a
+% number of iterations
+% Author: Oscar Juul Andersen, s194316
+%%
 
-% --------------------------------------------------------------
-% Setup random values
-% --------------------------------------------------------------
-nx = size(Ad,1); %4;
+%% Setup matrices
+nx = size(Ad,1);
 nx_diff = nx-4;
-if nx_diff > 2
-    ds = [zeros(nx_diff-2,1); ds];
-end
-%nu = 2;
-% G = eye(nx);
-% Qz = eye(nu); %diag([1,1]);
-S = zeros(nx,4);
-%Rvv = eye(nx);
-% Q = eye(nx);
-Q = Qd;
-%Rwv = zeros(nx);
-% Wz = eye(nu);
-% Wu = eye(nu);
-% Wdu = zeros(nu); %eye(nu);
-% R = eye(4);
 
-% --------------------------------------------------------------
-% Setup matices
-% --------------------------------------------------------------
+
+S = zeros(nx,4);
+Q = Qd;
+
 N = size(X,1);
-% Xkk = zeros(N-1,4);
 Xkk = zeros(N-1,6);
 dkk = zeros(N-1,nx_diff);
-% Xkp1k = zeros(N-1,4);
 Xkp1k = zeros(N-1,6);
 Ykk = zeros(N-1,4);
 Ykp1k = zeros(N-1,4);
 Tkk = T(2:end);
 
-% --------------------------------------------------------------
-% Static, so we can define this out of the loop
-% --------------------------------------------------------------
+%% Calculate static matrices, to save computation time
 P = dare(Ad',Cd',G*Q*G',R,G*S);
 Re = Cd*P*Cd' + R;
 Kfx = P*Cd'*inv(Re);
 Kfw = S*inv(Re);
 
-% --------------------------------------------------------------
-% Perform 1 step prediction of Kalman filter and save in matrix
-% --------------------------------------------------------------
-% dkkm1 = zeros(nx_diff,1);
-% xkkm1 = [X(1,:)'-xs;dkkm1];
+%% Do the Kalman filtering
 xkkm1 = X(1,:)'-xs;
 
 for i = 1:N-1
